@@ -7,11 +7,12 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
     <Version>1</Version>
-    <PackageIcon>图标.ico</PackageIcon>
+    <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
     <Description>MATLAB一些数组操作的.Net实现，详见项目URL。</Description>
+    <PackageLicenseFile>许可.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -35,7 +36,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\图标.ico">
+    <None Include="..\图标.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\许可.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
