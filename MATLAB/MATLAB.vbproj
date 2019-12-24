@@ -4,6 +4,14 @@
     <RootNamespace>MATLAB</RootNamespace>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>帕菲菲</Authors>
+    <Version>1</Version>
+    <PackageIcon>图标.ico</PackageIcon>
+    <PackageIconUrl />
+    <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -25,5 +33,12 @@
     <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
     <WarningsAsErrors></WarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\图标.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
