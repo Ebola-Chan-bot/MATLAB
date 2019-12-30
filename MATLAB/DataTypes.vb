@@ -10,10 +10,22 @@ Public Module DataTypes
 		a.MoveNext()
 		Return a.Current.GetType
 	End Function
-	Public Function Cast(Of T)(A As Array) As Array(Of T)
-		Return New Array(Of T)(A)
+	''' <summary>
+	''' 将数组转换为不同的数据类型
+	''' </summary>
+	''' <typeparam name="newclass">目标类</typeparam>
+	''' <param name="A">要转换的数组</param>
+	''' <returns>转换后的数组</returns>
+	Public Function Cast(Of newclass)(A As Array) As Array(Of newclass)
+		Return New Array(Of newclass)(A)
 	End Function
-	Public Function Cast(Of T)(A As Object) As T
+	''' <summary>
+	''' 将变量转换为不同的数据类型
+	''' </summary>
+	''' <typeparam name="newclass">目标类</typeparam>
+	''' <param name="A">要转换的变量</param>
+	''' <returns>转换后的变量</returns>
+	Public Function Cast(Of newclass)(A As Object) As newclass
 		Return A
 	End Function
 End Module

@@ -158,12 +158,12 @@ Public Module ImageSci
 	ReadOnly Property GUID_WICPixelFormat16bppCbQuantizedDctCoefficients As New Guid(&HD2C4FF61, &H56A5, &H49C2, &H8B, &H5C, &H4C, &H19, &H25, &H96, &H48, &H37)
 	ReadOnly Property GUID_WICPixelFormat16bppCrQuantizedDctCoefficients As New Guid(&H2FE354F0, &H1680, &H42D8, &H92, &H31, &HE7, &H3C, &H5, &H65, &HBF, &HC1)
 	''' <summary>
-	''' 不同于MATLAB，无论图片文件本身格式为何，此函数总是将返回高×宽×RGB形式的Byte数组，即模块中列出的GUID_WICPixelFormat32bppRGBA格式。列出的其它格式只表示这些格式的图片文件可以被正确读取。
+	''' 不同于MATLAB，无论图片文件本身格式为何，此函数总是将返回高×宽×RGB[×帧]形式的Byte数组，即模块中列出的GUID_WICPixelFormat32bppRGBA格式。列出的其它格式只表示这些格式的图片文件可以被正确读取。
 	''' </summary>
 	''' <param name="filename">图片文件路径</param>
-	''' <param name="transparency">可选返回Alpha通道</param>
-	''' <param name="Frames">对于多帧图像（如GIF），选择返回的帧序号。不同于MATLAB，从0开始</param>
-	''' <returns>高×宽×RGB形式的Byte数组</returns>
+	''' <param name="transparency">可选返回Alpha通道。如果返回多帧，将安排在第3维。</param>
+	''' <param name="Frames">对于多帧图像（如GIF），选择返回的帧序号。不同于MATLAB，从0开始。如果返回多帧，将安排在第4维。</param>
+	''' <returns>高×宽×RGB[×帧]形式的Byte数组</returns>
 	Public Function ImRead(filename As String, Optional ByRef transparency As Array(Of Byte) = Nothing, Optional Frames As UInteger() = Nothing) As Array(Of Byte)
 		Static 图像工厂 As IntPtr
 		ComException.检查(CoCreateInstance(New Guid("317D06E8-5F24-433D-BDF7-79CE68D8ABC2"), Nothing, TagCLSCTX.CLSCTX_INPROC_SERVER, New Guid("ec5ec8a9-c395-4314-9c77-54d7a935ff70"), 图像工厂), "Ole32：创建Com实例失败")
@@ -172,7 +172,7 @@ Public Module ImageSci
 		If Frames Is Nothing Then Frames = {0}
 		If Frames.Length = 1 Then
 			ComException.检查(IWICBitmapDecoder_GetFrame_Proxy(a, Frames(0), a), "WindowsCodecs：获取帧失败")
-			ComException.检查(WICConvertBitmapSource(GUID_WICPixelFormat32bppBGRA, a, a), "WindowsCodecs：转换位图源失败")
+			ComException.检查(WICConvertBitmapSource(GUID_WICPixelFormat32bppRGBA, a, a), "WindowsCodecs：转换位图源失败")
 			Dim b As UInteger, c As UInteger
 			ComException.检查(IWICBitmapSource_GetSize_Proxy(a, b, c), "WindowsCodecs：获取尺寸失败")
 			Dim e(b * c * 4 - 1) As Byte
@@ -193,7 +193,7 @@ Public Module ImageSci
 		Else
 			Dim l As IntPtr
 			ComException.检查(IWICBitmapDecoder_GetFrame_Proxy(a, Frames(0), l), "WindowsCodecs：获取帧失败")
-			ComException.检查(WICConvertBitmapSource(GUID_WICPixelFormat32bppBGRA, l, l), "WindowsCodecs：转换位图源失败")
+			ComException.检查(WICConvertBitmapSource(GUID_WICPixelFormat32bppRGBA, l, l), "WindowsCodecs：转换位图源失败")
 			Dim b As UInteger, c As UInteger
 			ComException.检查(IWICBitmapSource_GetSize_Proxy(l, b, c), "WindowsCodecs：获取尺寸失败")
 			Dim e(b * c * 4 - 1) As Byte, k As New WICRect With {.X = 0, .Y = 0, .Height = c, .Width = b}
@@ -202,7 +202,7 @@ Public Module ImageSci
 			transparency = New Array(Of Byte)(c, b, Frames.Length)
 			For j As Integer = 0 To Frames.GetUpperBound(0)
 				IWICBitmapDecoder_GetFrame_Proxy(a, Frames(j), l)
-				WICConvertBitmapSource(GUID_WICPixelFormat32bppBGRA, l, l)
+				WICConvertBitmapSource(GUID_WICPixelFormat32bppRGBA, l, l)
 				IWICBitmapSource_CopyPixels_Proxy(l, k, b * 4, e.Length, e)
 				i = e.AsEnumerable.GetEnumerator
 				For f As Integer = 0 To c - 1
