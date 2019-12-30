@@ -14,23 +14,6 @@ Friend Structure WICRect
 	Property Width As Integer
 	Property Height As Integer
 End Structure
-<ComImport, Guid("00000120-a8f2-4877-ba0a-fd2b6645fb94"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> Friend Interface IWICBitmapSource
-	Function GetSize(<Out> ByRef puiWidth As UInteger, <Out> ByRef puiHeight As UInteger)
-	Function GetPixelFormat() As Guid
-	Function CopyPixels(prc As IntPtr, cbStride As UInteger, cbBufferSize As UInteger, <MarshalAs(UnmanagedType.LPArray, ArraySubType:=UnmanagedType.U1, SizeParamIndex:=2)> pbBuffer As Byte())
-End Interface
-<ComImport, Guid("3B16811B-6A43-4ec9-A813-3D930C13B940"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> Friend Interface IWICBitmapFrameDecode
-	Inherits IWICBitmapSource
-End Interface
-<ComImport, Guid("9EDDE9E7-8DEE-47ea-99DF-E6FAF2ED44BF"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> Friend Interface IWICBitmapDecoder
-	Function GetFrame(index As UInteger) As IWICBitmapFrameDecode
-	Function GetFrameCount() As Integer
-End Interface
-<ComImport, Guid("ec5ec8a9-c395-4314-9c77-54d7a935ff70"), CoClass(GetType(WICImagingFactoryClass)), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> Friend Interface IWICImagingFactory
-	Function CreateDecoderFromFilename(<MarshalAs(UnmanagedType.LPWStr)> wzFilename As String, pguidVendor As IntPtr, dwDesiredAccess As StandardAccessTypes, metadataOptions As WICDecodeOptions) As IWICBitmapDecoder
-End Interface
-<ComImport, Guid("317D06E8-5F24-433D-BDF7-79CE68D8ABC2"), ComDefaultInterface(GetType(IWICImagingFactory))> Friend Class WICImagingFactoryClass
-End Class
 Public Enum HRESULT As Long
 	S_OK = 0
 	WINCODEC_ERR_COMPONENTNOTFOUND = 2291674960
