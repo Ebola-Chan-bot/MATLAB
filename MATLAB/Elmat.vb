@@ -41,10 +41,10 @@ Public Module Elmat
 	End Function
 #Region "Private"
 	Private Sub Reshape递归(原数组 As IEnumerator, 维度数 As Byte, 各维长度 As Integer(), 新数组 As Array, 当前维度 As Byte, 新索引 As Integer())
-		If 当前维度 < 维度数 - 1 Then
+		If 当前维度 > 0 Then
 			For a As Integer = 0 To 各维长度(当前维度) - 1
 				新索引(当前维度) = a
-				Reshape递归(原数组, 维度数, 各维长度, 新数组, 当前维度 + 1, 新索引)
+				Reshape递归(原数组, 维度数, 各维长度, 新数组, 当前维度 - 1, 新索引)
 			Next
 		Else
 			For a As Integer = 0 To 各维长度(当前维度) - 1
@@ -143,16 +143,16 @@ Public Module Elmat
 	Public Function Bsxfun(Of T)(fun As Funbsx(Of T), A As Array, B As Array) As Array(Of T)
 		Dim c As Integer() = 适配(A, B)
 		Dim d As New Array(Of T)(c)
-		Bsxfun递归(Of T)(fun, A, B, c.Length, c, d, 0, Zeros(Of Integer)(c.Length))
+		Bsxfun递归(fun, A, B, c.Length, c, d, 0, Zeros(Of Integer)(c.Length))
 		Return d
 	End Function
 	''' <summary>
-	''' 重构数组
+	''' 重构数组。
 	''' </summary>
-	''' <param name="A">输入数组</param>
+	''' <param name="A">输入数组，必须具有确定的长度</param>
 	''' <param name="sz">各维长度，可以使用一个Nothing表示自动推断该维长度</param>
 	''' <returns>重构的数组</returns>
-	<Extension> Public Function Reshape(A As Array, ParamArray sz As UInteger?()) As Array
+	<Extension> Public Function Reshape(A As ICollection, ParamArray sz As UInteger?()) As Array
 		Dim f As Byte = sz.Length, b As UInteger = 1, c As UInteger? = Nothing, Lengths(f - 1) As Integer
 		For e As Byte = 0 To f - 1
 			If sz(e) Is Nothing Then
@@ -163,10 +163,10 @@ Public Module Elmat
 			End If
 		Next
 		If c IsNot Nothing Then
-			Lengths(c) = A.Length / b
+			Lengths(c) = A.Count / b
 		End If
 		Dim d As Array = Array.CreateInstance(A.Class, Lengths)
-		Reshape递归(A.GetEnumerator, f, Lengths, d, 0, Zeros(Of Integer)(f))
+		Reshape递归(A.GetEnumerator, f, Lengths, d, f - 1, Zeros(Of Integer)(f))
 		Return d
 	End Function
 	''' <summary>
@@ -213,6 +213,23 @@ Public Module Elmat
 		Else
 			Return 1
 		End If
+	End Function
+	''' <summary>
+	''' 数组大小
+	''' </summary>
+	''' <param name="A">输入数组</param>
+	''' <returns>数组各维尺寸构成的数组</returns>
+	Public Function Size(Of T)(A As Array(Of T)) As Integer()
+		Return A.Size
+	End Function
+	''' <summary>
+	''' 数组大小
+	''' </summary>
+	''' <param name="A">输入数组</param>
+	''' <param name="[dim]">查询的维度</param>
+	''' <returns>数组大小</returns>
+	Public Function Size(Of T)(A As Array(Of T), [dim] As Byte) As Integer
+		Return A.Size([dim])
 	End Function
 #End Region
 End Module

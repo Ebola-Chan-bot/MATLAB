@@ -6,13 +6,15 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1</Version>
+    <Version>1.0.1</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。</Description>
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class, zeros, ones, bsxfun, reshape, permute, size, colon, subsasgn, subsref, plus, minus。 此外将System.Array类增强为Array(Of T)。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
