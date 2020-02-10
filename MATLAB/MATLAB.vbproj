@@ -11,15 +11,16 @@
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class, zeros, ones, bsxfun, reshape, permute, size, colon, subsasgn, subsref, plus, minus, cast, imread。 此外将System.Array类增强为Array(Of T)。
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class, zeros, ones, bsxfun, reshape, permute, size, colon, plus, minus, cast, imread, rand, arrayfun, cat, numel, times, rdivide。 此外将System.Array类增强为Array(Of T)。
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <FileVersion>1.1.0.0</FileVersion>
     <PackageReleaseNotes>1.1.0：
-功能改进：Array(Of T), class, reshape, bsxfun, size, colon
-新增函数：cast, imread</PackageReleaseNotes>
+功能改进：Array(Of T), cast, bsxfun, reshape, permute, size, imread, plus, minus
+新增函数：rand, arrayfun, cat, numel, times, rdivide
+移除函数：subsref, subsasgn</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
