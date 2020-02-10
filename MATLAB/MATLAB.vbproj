@@ -6,38 +6,40 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class, zeros, ones, bsxfun, reshape, permute, size, colon, subsasgn, subsref, plus, minus, cast, imread。 此外将System.Array类增强为Array(Of T)。</Description>
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class, zeros, ones, bsxfun, reshape, permute, size, colon, subsasgn, subsref, plus, minus, cast, imread。 此外将System.Array类增强为Array(Of T)。
+欢迎在项目URL提交Issues。
+新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>1.0.1.1</FileVersion>
-    <PackageReleaseNotes>1.0.1：
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <PackageReleaseNotes>1.1.0：
 功能改进：Array(Of T), class, reshape, bsxfun, size, colon
 新增函数：cast, imread</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
-    <WarningsAsErrors></WarningsAsErrors>
+    <NoWarn>41999,42016,42020,42021,42022</NoWarn>
+    <WarningsAsErrors>42017,42018,42019,42032,42036</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
-    <WarningsAsErrors></WarningsAsErrors>
+    <NoWarn>41999,42016,42020,42021,42022</NoWarn>
+    <WarningsAsErrors>42017,42018,42019,42032,42036</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
-    <WarningsAsErrors></WarningsAsErrors>
+    <NoWarn>41999,42016,42020,42021,42022</NoWarn>
+    <WarningsAsErrors>42017,42018,42019,42032,42036</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</NoWarn>
-    <WarningsAsErrors></WarningsAsErrors>
+    <NoWarn>41999,42016,42020,42021,42022</NoWarn>
+    <WarningsAsErrors>42017,42018,42019,42032,42036</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
