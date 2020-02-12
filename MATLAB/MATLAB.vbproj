@@ -6,7 +6,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
@@ -15,9 +15,9 @@
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <PackageReleaseNotes>1.1.0：
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
+    <FileVersion>1.1.1.0</FileVersion>
+    <PackageReleaseNotes>1.1.1：
 功能改进：Array(Of T), cast, bsxfun, reshape, permute, size, imread, plus, minus
 新增函数：rand, arrayfun, cat, numel, times, rdivide
 移除函数：subsref, subsasgn</PackageReleaseNotes>

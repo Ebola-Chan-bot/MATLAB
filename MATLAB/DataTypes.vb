@@ -21,9 +21,7 @@ Public Module DataTypes
 	''' <param name="数组">数组</param>
 	''' <returns>类</returns>
 	<Extension> Public Function [Class](数组 As IEnumerable) As Type
-		Dim a As IEnumerator = 数组.GetEnumerator
-		a.MoveNext()
-		Return a.Current.GetType
+		Return 数组.GetType.GetElementType
 	End Function
 	''' <summary>
 	''' 将数组转换为不同的数据类型

@@ -200,6 +200,7 @@ Public Module ElMat
 	''' <summary>
 	''' 数组大小。末尾的单一维度会忽略。
 	''' </summary>
+	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <returns>数组各维尺寸构成的数组</returns>
 	Public Function Size(Of T)(A As Array(Of T)) As Integer()
@@ -208,6 +209,7 @@ Public Module ElMat
 	''' <summary>
 	''' 数组大小
 	''' </summary>
+	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <param name="[dim]">查询的维度</param>
 	''' <returns>数组大小</returns>
@@ -218,6 +220,7 @@ Public Module ElMat
 	''' <summary>
 	''' 数组的维度数目，忽略较高的单一维度。
 	''' </summary>
+	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <returns>维度数</returns>
 	Public Function NDims(Of T)(A As Array(Of T)) As Byte
