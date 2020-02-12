@@ -142,7 +142,7 @@ Public Class Array(Of T)
 		本体 = Array.CreateInstance(GetType(T), 尺寸)
 	End Sub
 	''' <summary>
-	''' 此转换会创建一个新数组。调用方有义务保证数组的类型是兼容的。
+	''' 此转换会创建一个新数组。调用方有义务保证元素的类型是可正确转换的。
 	''' </summary>
 	''' <param name="本体">待转换的数组</param>
 	''' <returns>尺寸相同的新数组，但元素类型可能改变</returns>
