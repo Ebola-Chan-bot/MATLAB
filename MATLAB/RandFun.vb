@@ -1,25 +1,14 @@
 ﻿Public Module RandFun
-	Private Sub Rand递归(数组 As Array, 当前维度 As Byte, 当前索引 As Integer())
-		Static 随机生成器 As New Random
-		If 当前维度 < 数组.Rank - 1 Then
-			For a As Integer = 0 To 数组.GetUpperBound(当前维度)
-				当前索引(当前维度) = a
-				Rand递归(数组, 当前维度 + 1, 当前索引)
-			Next
-		Else
-			For a As Integer = 0 To 数组.GetUpperBound(当前维度)
-				当前索引(当前维度) = a
-				数组.SetValue(随机生成器.NextDouble, 当前索引)
-			Next
-		End If
-	End Sub
 	''' <summary>
-	''' (0,1)均匀分布的随机数
+	''' 返回由随机数组成的 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。例如：<c>Rand(3, 4)</c>返回一个 3×4 的矩阵。
 	''' </summary>
 	''' <param name="sz">每个维度的大小</param>
 	''' <returns>指定尺寸的随机数组</returns>
-	Public Function Rand(ParamArray sz As Integer()) As Array(Of Double)
+	Public Function Rand(ParamArray sz As UInteger()) As Array(Of Double)
 		Rand = New Array(Of Double)(sz)
-		Rand递归(Rand, 0, Zeros(Of Integer)(sz.Length))
+		Static 随机生成器 As New Random
+		For a = 0 To Rand.Numel - 1
+			Rand.本体(a) = 随机生成器.NextDouble
+		Next
 	End Function
 End Module

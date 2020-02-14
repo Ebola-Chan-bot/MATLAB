@@ -1,34 +1,109 @@
 Public Module ElMat
-	Public Delegate Function Funbsx(A, B)
+	''' <summary>
+	''' 这里不创建新数组，故用底层<see cref="Array"/>
+	''' </summary>
+	Private Sub Cat递归(Of T)(源数组 As Array(Of T), 目标数组 As Array(Of T), 当前维度 As Byte, 源索引 As UInteger(), 目标索引 As UInteger(), 目标维度 As Byte, 目标维度累积数 As UInteger)
+		If 当前维度 < 目标数组.NDims - 1 Then
+			If 当前维度 = 目标维度 Then
+				For a As UInteger = 0 To 源数组.Size(当前维度) - 1
+					源索引(当前维度) = a
+					目标索引(当前维度) = 目标维度累积数 + a
+					Cat递归(源数组, 目标数组, 当前维度 + 1, 源索引, 目标索引, 目标维度, 目标维度累积数)
+				Next
+			Else
+				For a As UInteger = 0 To 源数组.Size(当前维度) - 1
+					源索引(当前维度) = a
+					目标索引(当前维度) = a
+					Cat递归(源数组, 目标数组, 当前维度 + 1, 源索引, 目标索引, 目标维度, 目标维度累积数)
+				Next
+			End If
+		Else
+			If 当前维度 = 目标维度 Then
+				If 当前维度 < 源索引.Length Then
+					For a As UInteger = 0 To 源数组.Size(当前维度) - 1
+						源索引(当前维度) = a
+						目标索引(当前维度) = 目标维度累积数 + a
+						目标数组.SetValue(源数组.GetValue(源索引), 目标索引)
+					Next
+				Else
+					For a As UInteger = 0 To 源数组.Size(当前维度) - 1
+						目标索引(当前维度) = 目标维度累积数 + a
+						目标数组.SetValue(源数组.GetValue(源索引), 目标索引)
+					Next
+				End If
+			Else
+				For a As UInteger = 0 To 源数组.Size(当前维度) - 1
+					源索引(当前维度) = a
+					目标索引(当前维度) = a
+					目标数组.SetValue(源数组.GetValue(源索引), 目标索引)
+				Next
+			End If
+		End If
+	End Sub
+	''' <summary>
+	''' 返回由零组成并且数据类型为<c>typename</c>的 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Zeros(2, 3)</c>将返回一个 2×3 矩阵。
+	''' </summary>
+	''' <typeparam name="typename">要创建的数据类型（类）</typeparam>
+	''' <param name="sz">每个维度的大小</param>
+	''' <returns>全零数组</returns>
+	Public Function Zeros(Of typename)(ParamArray sz As UInteger()) As Array(Of typename)
+		Return New Array(Of typename)(sz)
+	End Function
+	''' <summary>
+	''' 返回由零组成并且数据类型为<see cref="Double"/>的 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Zeros(2, 3)</c>将返回一个 2×3 矩阵。
+	''' </summary>
+	''' <param name="sz">每个维度的大小</param>
+	''' <returns>全零<see cref="Double"/>数组</returns>
+	Public Function Zeros(ParamArray sz As UInteger()) As Array(Of Double)
+		Return Zeros(Of Double)(sz)
+	End Function
+	''' <summary>
+	''' 返回一个由 1 组成并且数据类型为 classname 的 sz1×...×szN 数组。
+	''' </summary>
+	''' <typeparam name="classname">输出类</typeparam>
+	''' <param name="sz">每个维度的大小</param>
+	''' <returns>全1数组</returns>
+	Public Function Ones(Of classname)(ParamArray sz As UInteger()) As Array(Of classname)
+		Ones = New Array(Of classname)(sz)
+		Ones.本体 = Enumerable.Repeat(Of classname)(DirectCast(1, Object), Ones.Numel).ToArray
+	End Function
+	''' <summary>
+	''' 返回由 1 组成的 sz1×...×szN <see cref="Double"/>数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Ones(2, 3)</c>返回由 1 组成的 2×3 数组。
+	''' </summary>
+	''' <param name="sz">每个维度的大小</param>
+	''' <returns>全1<see cref="Double"/>数组</returns>
+	Public Function Ones(ParamArray sz As UInteger()) As Array(Of Double)
+		Return Ones(Of Double)(sz)
+	End Function
 	''' <summary>
 	''' 这里不会创建新数组，因此可以用底层的<see cref="Array"/>
 	''' </summary>
-	Private Sub 适配递归(Of T1, T2)(原数组1 As Array(Of T1), 原数组2 As Array(Of T2), 各维长度 As Integer(), 总维数 As Byte, 新数组1 As Array, 新数组2 As Array, 当前索引 As Integer(), 当前维数 As Byte, 原索引1 As Integer(), 原索引2 As Integer())
-		Dim b As Integer = 原数组1.Size(当前维数), c As Integer = 原数组2.Size(当前维数)
+	Private Sub 适配递归(Of T1, T2)(原数组1 As Array(Of T1), 原数组2 As Array(Of T2), 各维长度 As UInteger(), 总维数 As Byte, 新数组1 As Array(Of T1), 新数组2 As Array(Of T2), 当前索引 As UInteger(), 当前维数 As Byte, 原索引1 As UInteger(), 原索引2 As UInteger())
+		Dim b As UInteger = 原数组1.Size(当前维数), c As UInteger = 原数组2.Size(当前维数)
 		If 当前维数 < 总维数 - 1 Then
-			For a As Integer = 0 To 各维长度(当前维数) - 1
+			For a As UInteger = 0 To 各维长度(当前维数) - 1
 				当前索引(当前维数) = a
 				If 当前维数 < 原数组1.NDims Then 原索引1(当前维数) = a Mod b
 				If 当前维数 < 原数组2.NDims Then 原索引2(当前维数) = a Mod c
 				适配递归(原数组1, 原数组2, 各维长度, 总维数, 新数组1, 新数组2, 当前索引, 当前维数 + 1, 原索引1, 原索引2)
 			Next
 		Else
-			For a As Integer = 0 To 各维长度(当前维数) - 1
+			For a As UInteger = 0 To 各维长度(当前维数) - 1
 				当前索引(当前维数) = a
 				If 当前维数 < 原数组1.NDims Then 原索引1(当前维数) = a Mod b
 				If 当前维数 < 原数组2.NDims Then 原索引2(当前维数) = a Mod c
-				新数组1.SetValue(原数组1(原索引1), 当前索引)
-				新数组2.SetValue(原数组2(原索引2), 当前索引)
+				新数组1.SetValue(原数组1.GetValue(原索引1), 当前索引)
+				新数组2.SetValue(原数组2.GetValue(原索引2), 当前索引)
 			Next
 		End If
 	End Sub
 	''' <summary>
-	''' 判断两个数组尺寸是否匹配
+	''' 判断两个数组尺寸是否匹配，即各维长度均相等
 	''' </summary>
-	Private Function 匹配(Of T1, T2)(数组1 As Array(Of T1), 数组2 As Array(Of T2)) As Boolean
+	Function 匹配(Of T1, T2)(数组1 As Array(Of T1), 数组2 As Array(Of T2)) As Boolean
 		Dim a As Byte = 数组1.NDims, b As Byte = 数组2.NDims
 		If a = b Then
-			Dim d As Integer() = 数组1.Size, e As Integer() = 数组2.Size
+			Dim d As UInteger() = 数组1.Size, e As UInteger() = 数组2.Size
 			For c As Byte = 0 To a - 1
 				If d(c) <> e(c) Then
 					Return False
@@ -40,11 +115,11 @@ Public Module ElMat
 		End If
 	End Function
 	''' <summary>
-	''' 由于适配一定会创建新数组，即使用户输入的是<see cref="Array"/>也一律改成<see cref="Array(Of T)"/>
+	''' 先判断两个数组是否<see cref="匹配"/>，若匹配则原样返回。若不匹配，则对两个数组进行必要的扩展，使两个数组各维长度均相等，扩展采用循环填充（而非补0）。扩展操作会创建新的数组替换原来的数组。
 	''' </summary>
-	Friend Function 适配(Of T1, T2)(ByRef 数组1 As Array(Of T1), ByRef 数组2 As Array(Of T2)) As Integer()
-		If 匹配(数组1, 数组2) Then Return 数组1.Size
-		Dim b As Byte = Math.Max(数组1.NDims, 数组2.NDims), c(b - 1) As Integer, h As Integer, i As Integer
+	Function 适配(Of T1, T2)(ByRef 数组1 As Array(Of T1), ByRef 数组2 As Array(Of T2)) As UInteger()
+		If 匹配(数组1, 数组2) Then Return 数组1.Size.ToArray
+		Dim b As Byte = Math.Max(数组1.NDims, 数组2.NDims), c(b - 1) As UInteger, h As UInteger, i As UInteger
 		For a As Byte = 0 To b - 1
 			h = 数组1.Size(a)
 			i = 数组2.Size(a)
@@ -56,169 +131,61 @@ Public Module ElMat
 				c(a) = h
 			End If
 		Next
-		Dim d As New Array(Of T1)(c), e As New Array(Of T2)(c)
-		适配递归(数组1, 数组2, c, b, d, e, Zeros(Of Integer)(b), 0, Zeros(Of Integer)(数组1.NDims), Zeros(Of Integer)(数组2.NDims))
+		Dim d As New Array(Of T1)(c), e As New Array(Of T2)(c), f(b - 1) As UInteger, g(数组1.NDims - 1) As UInteger, j(数组2.NDims - 1) As UInteger
+		适配递归(数组1, 数组2, c, b, d, e, f, 0, g, j)
 		数组1 = d
 		数组2 = e
 		Return c
 	End Function
 	''' <summary>
-	''' 这里带类型参数是委托的要求
+	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
-	Friend Sub BsxFun递归(函数 As Funbsx, 数组1 As Array, 数组2 As Array, 维度数 As Byte, 各维长度 As Integer(), 新数组 As Array, 当前维度 As Byte, 当前索引 As Integer())
-		If 当前维度 < 维度数 - 1 Then
-			For a As Integer = 0 To 各维长度(当前维度) - 1
-				当前索引(当前维度) = a
-				BsxFun递归(函数, 数组1, 数组2, 维度数, 各维长度, 新数组, 当前维度 + 1, 当前索引)
-			Next
-		Else
-			For a As Integer = 0 To 各维长度(当前维度) - 1
-				当前索引(当前维度) = a
-				新数组.SetValue(函数.Invoke(数组1.GetValue(当前索引), 数组2.GetValue(当前索引)), 当前索引)
-			Next
-		End If
-	End Sub
-	Private Sub Ones递归(Of T)(数组 As Array, 类型1 As T, 维度数 As Byte, 各维长度 As Integer(), 当前维度 As Byte, 当前索引 As Integer())
-		If 当前维度 < 维度数 - 1 Then
-			For a As Integer = 0 To 各维长度(当前维度) - 1
-				当前索引(当前维度) = a
-				Ones递归(数组, 类型1, 维度数, 各维长度, 当前维度 + 1, 当前索引)
-			Next
-		Else
-			For a As Integer = 0 To 各维长度(当前维度) - 1
-				当前索引(当前维度) = a
-				数组.SetValue(类型1, 当前索引)
-			Next
-		End If
-	End Sub
-	''' <summary>
-	''' 这里不创建新数组，故用底层<see cref="Array"/>
-	''' </summary>
-	Private Sub Cat递归(Of T)(源数组 As Array(Of T), 目标数组 As Array, 当前维度 As Byte, 源索引 As Integer(), 目标索引 As Integer(), 目标维度 As Byte, 目标维度累积数 As Integer)
-		If 当前维度 < 目标数组.Rank - 1 Then
-			If 当前维度 = 目标维度 Then
-				For a As Integer = 0 To 源数组.Size(当前维度) - 1
-					源索引(当前维度) = a
-					目标索引(当前维度) = 目标维度累积数 + a
-					Cat递归(源数组, 目标数组, 当前维度 + 1, 源索引, 目标索引, 目标维度, 目标维度累积数)
-				Next
-			Else
-				For a As Integer = 0 To 源数组.Size(当前维度) - 1
-					源索引(当前维度) = a
-					目标索引(当前维度) = a
-					Cat递归(源数组, 目标数组, 当前维度 + 1, 源索引, 目标索引, 目标维度, 目标维度累积数)
-				Next
-			End If
-		Else
-			If 当前维度 = 目标维度 Then
-				For a As Integer = 0 To 源数组.Size(当前维度) - 1
-					源索引(当前维度) = a
-					目标索引(当前维度) = 目标维度累积数 + a
-					目标数组.SetValue(源数组(源索引), 目标索引)
-				Next
-			Else
-				For a As Integer = 0 To 源数组.Size(当前维度) - 1
-					源索引(当前维度) = a
-					目标索引(当前维度) = a
-					目标数组.SetValue(源数组(源索引), 目标索引)
-				Next
-			End If
-		End If
-	End Sub
-#Region "Public"
-	''' <summary>
-	''' 创建全零数组。不同于MATLAB，如果只有一个大小参数，将返回第1维向量，而不是正方矩阵。
-	''' </summary>
-	''' <typeparam name="T">要创建的数据类型（类）</typeparam>
-	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全零数组</returns>
-	Public Function Zeros(Of T)(ParamArray sz As Integer()) As Array(Of T)
-		Return New Array(Of T)(sz)
+	Public Function BsxFun(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As Array(Of TIn1), B As Array(Of TIn2)) As Array(Of TOut)
+		适配(A, B)
+		Return New Array(Of TOut)(A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray, A.Size.ToArray)
 	End Function
 	''' <summary>
-	''' 创建全零<see cref="Double"/>数组。不同于MATLAB，如果只有一个大小参数，将返回第1维向量，而不是正方矩阵。
-	''' </summary>
-	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全零<see cref="Double"/>数组</returns>
-	Public Function Zeros(ParamArray sz As Integer()) As Array(Of Double)
-		Return Zeros(Of Double)(sz)
-	End Function
-	''' <summary>
-	''' 创建全部为 1 的数组。不同于MATLAB，如果只有一个大小参数，将返回第1维向量，而不是正方矩阵。
-	''' </summary>
-	''' <typeparam name="T">输出类</typeparam>
-	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全1数组</returns>
-	Public Function Ones(Of T)(ParamArray sz As Integer()) As Array(Of T)
-		Dim a As New Array(Of T)(sz)
-		Ones递归(a, CType(DirectCast(1, Object), T), sz.Length, sz, 0, Zeros(Of Integer)(sz.Length))
-		Return a
-	End Function
-	''' <summary>
-	''' 创建全部为 1 的<see cref="Double"/>数组。不同于MATLAB，如果只有一个大小参数，将返回第1维向量，而不是正方矩阵。
-	''' </summary>
-	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全1<see cref="Double"/>数组</returns>
-	Public Function Ones(ParamArray sz As Integer()) As Array(Of Double)
-		Return Ones(Of Double)(sz)
-	End Function
-	''' <summary>
-	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2,2)+Ones(4,4)=Ones(4,4)+Ones(4,4)</c>
-	''' </summary>
-	''' <typeparam name="T">输出元素类型</typeparam>
-	''' <param name="fun">要应用的二元函数</param>
-	''' <param name="A">输入数组</param>
-	''' <param name="B">输入数组</param>
-	''' <returns>返回数组</returns>
-	Public Function BsxFun(Of TIn1, TIn2, TOut)(fun As Funbsx, A As Array(Of TIn1), B As Array(Of TIn2)) As Array(Of TOut)
-		Dim c As Integer() = 适配(A, B)
-		Dim d As New Array(Of TOut)(c)
-		BsxFun递归(fun, A, B, c.Length, c, d, 0, Zeros(Of Integer)(c.Length))
-		Return d
-	End Function
-	''' <summary>
-	''' 重构数组
+	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。
 	''' </summary>
 	''' <typeparam name="T">元素类型</typeparam>
 	''' <param name="A">输入数组，必须具有确定的长度</param>
 	''' <param name="sz">各维长度，可以使用一个Nothing表示自动推断该维长度</param>
 	''' <returns>重构的数组</returns>
 	Public Function Reshape(Of T)(A As Array(Of T), ParamArray sz As UInteger?()) As Array(Of T)
-		Return A.Reshape(sz)
+		Reshape = A.Clone
+		Reshape.Reshape(sz)
 	End Function
 	''' <summary>
-	''' 置换数组维度，维度顺序从0开始。
+	''' 按照向量 dimorder 指定的顺序重新排列数组的维度。例如，<c>Permute(A, 1, 0)</c> 交换矩阵 A 的行和列维度。
 	''' </summary>
-	''' <typeparam name="T">元素类型，缺省<see cref="Object"/></typeparam>
+	''' <typeparam name="T">元素类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <param name="dimorder">维度顺序。不同于MATLAB，从0开始</param>
 	''' <returns>置换维度的数组</returns>
 	Public Function Permute(Of T)(A As Array(Of T), ParamArray dimorder As Byte()) As Array(Of T)
 		Return A.Permute(dimorder)
 	End Function
-#Region "Size"
 	''' <summary>
-	''' 数组大小。末尾的单一维度会忽略。
+	''' 返回一个向量，其元素包含 A 的相应维度的长度。例如，如果 A 是一个 3×4 矩阵，则<c>Size(A)</c>返回向量<c>{3, 4}</c>。sz 的长度为<c>NDims(A)</c>。
 	''' </summary>
 	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <returns>数组各维尺寸构成的数组</returns>
-	Public Function Size(Of T)(A As Array(Of T)) As Integer()
+	Public Function Size(Of T)(A As Array(Of T)) As UInteger()
 		Return A.Size
 	End Function
 	''' <summary>
-	''' 数组大小
+	''' 返回维度 dim 的长度。
 	''' </summary>
 	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <param name="[dim]">查询的维度</param>
 	''' <returns>数组大小</returns>
-	Public Function Size(Of T)(A As Array(Of T), [dim] As Byte) As Integer
+	Public Function Size(Of T)(A As Array(Of T), [dim] As Byte) As UInteger
 		Return A.Size([dim])
 	End Function
-#End Region
 	''' <summary>
-	''' 数组的维度数目，忽略较高的单一维度。
+	''' 返回数组 A 的维数。函数会忽略<c>Size(A, [dim]) = 1</c>所针对的尾部单一维度。
 	''' </summary>
 	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
@@ -227,41 +194,40 @@ Public Module ElMat
 		Return A.NDims
 	End Function
 	''' <summary>
-	''' 串联数组。所有输入在串联维度以外的维度必须匹配，此函数不会检查是否匹配，不匹配的数组串联可能会报错或产生未知结果。
+	''' 沿维度 dim 串联 A1、A2、…、An。调用方应保证所有输入在串联维度以外的维度等长，此函数不会进行检查。
 	''' </summary>
 	''' <typeparam name="T">元素类型，缺省<see cref="Object"/></typeparam>
 	''' <param name="[dim]">沿其运算的维度</param>
 	''' <param name="A">输入列表</param>
 	''' <returns>串联的数组</returns>
 	Public Function Cat(Of T)([dim] As Byte, ParamArray A As Array(Of T)()) As Array(Of T)
-		Dim b As Array(Of Integer) = A(0).Size, c As Integer, d As Array(Of T)
-		For Each d In A
+		Dim b As Array(Of UInteger) = A(0).Size.ToArray, c As UInteger
+		For Each d As Array(Of T) In A
 			c += d.Size([dim])
 		Next
+		'这一步可能会扩展数组
 		b([dim]) = c
-		c = b.Numel - 1
+		Dim h As UInteger() = b
+		c = h.Length - 1
 		For e As Byte = 0 To c
-			If b(e) = 0 Then b(e) = 1
+			If h(e) = 0 Then h(e) = 1
 		Next
-		Dim g As New Array(Of T)(CType(b, Integer()))
-		For e As Byte = 0 To c
-			b(e) = 0
-		Next
-		b([dim]) = -1
-		Dim f(c) As Integer
-		For Each d In A
-			Cat递归(d, g, 0, f, b, [dim], b([dim]) + 1)
+		Dim g As New Array(Of T)(h), i(c) As UInteger
+		Dim f As UInteger()
+		For Each d As Array(Of T) In A
+			ReDim f(d.NDims - 1)
+			Cat递归(d, g, 0, f, i, [dim], i([dim]))
+			i([dim]) += 1
 		Next
 		Return g
 	End Function
 	''' <summary>
-	''' 返回数组 A 中的元素数目 n 等同于 prod(size(A))。
+	''' 返回数组 A 中的元素数目
 	''' </summary>
 	''' <typeparam name="T">数据类型</typeparam>
 	''' <param name="A">输入数组</param>
 	''' <returns>元素数目</returns>
-	Function Numel(Of T)(A As Array(Of T)) As Integer
+	Public Function Numel(Of T)(A As Array(Of T)) As UInteger
 		Return A.Numel
 	End Function
-#End Region
 End Module

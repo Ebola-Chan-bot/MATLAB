@@ -15,7 +15,7 @@
 		Return a
 	End Function
 	''' <summary>
-	''' 创建<see cref="Double"/>等差数列，类似于MATLAB三元冒号运算符
+	''' 创建一个固定间隔向量 x，以 i 作为元素之间的增量。向量元素大致为 [j,j+i,j+2*i,...,j+m*i]，其中 m = fix((k-j)/i)。但是，如果 i 不是整数，则浮点算术运算的作用在于确定 colon 是否包括向量中的端点 k，因为 k 可能并不是正好等于 j+m*i。
 	''' </summary>
 	''' <param name="j">起点</param>
 	''' <param name="i">公差</param>
@@ -25,7 +25,7 @@
 		Return IColon(j, i, k)
 	End Function
 	''' <summary>
-	''' 创建公差为1的<see cref="Double"/>等差数列，类似于MATLAB二元冒号运算符
+	''' 创建一个包含元素 [j,j+1,j+2,...,j+m] 的单位间距向量 x，其中 m = fix(k-j)。如果 j 和 k 都是整数，则简化为 [j,j+1,...,k]。
 	''' </summary>
 	''' <param name="j">起点</param>
 	''' <param name="k">终点</param>
@@ -34,7 +34,7 @@
 		Return IColon(j, 1, k)
 	End Function
 	''' <summary>
-	''' 创建等差数列，指定返回值类型，类似于MATLAB三元冒号运算符
+	''' 创建一个固定间隔向量 x，以 i 作为元素之间的增量。向量元素大致为 [j,j+i,j+2*i,...,j+m*i]，其中 m = fix((k-j)/i)。但是，如果 i 不是整数，则浮点算术运算的作用在于确定 colon 是否包括向量中的端点 k，因为 k 可能并不是正好等于 j+m*i。
 	''' </summary>
 	''' <typeparam name="T">返回值类型</typeparam>
 	''' <param name="j">起点</param>
@@ -45,7 +45,7 @@
 		Return CType(IColon(j, i, k), Array(Of T))
 	End Function
 	''' <summary>
-	''' 创建公差为1的等差数列，指定返回值类型，类似于MATLAB二元冒号运算符
+	''' 创建一个包含元素 [j,j+1,j+2,...,j+m] 的单位间距向量 x，其中 m = fix(k-j)。如果 j 和 k 都是整数，则简化为 [j,j+1,...,k]。
 	''' </summary>
 	''' <typeparam name="T">返回值类型</typeparam>
 	''' <param name="j">起点</param>
@@ -85,7 +85,7 @@
 		Return A * B
 	End Function
 	''' <summary>
-	''' 数组右除,每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了/运算符
+	''' 数组右除，每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了/运算符
 	''' </summary>
 	''' <typeparam name="T">返回元素类型</typeparam>
 	''' <param name="A">被除数组</param>
@@ -95,13 +95,13 @@
 		Return A / B
 	End Function
 	''' <summary>
-	''' 确定相等性。对两个数组对应位置判断是否相等，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了=运算符
+	''' 确定相等性。对两个数组对应位置判断是否相等，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了=运算符。
 	''' </summary>
 	''' <typeparam name="T">比较数据类型</typeparam>
 	''' <param name="A">左数组</param>
 	''' <param name="B">右数组</param>
 	''' <returns>比较结果数组</returns>
-	Function Eq(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
+	Public Function Eq(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
 		Return A = B
 	End Function
 	''' <summary>
@@ -111,7 +111,7 @@
 	''' <param name="A">左数组</param>
 	''' <param name="B">右数组</param>
 	''' <returns>比较结果数组</returns>
-	Function Ne(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
+	Public Function Ne(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
 		Return A <> B
 	End Function
 	''' <summary>
@@ -121,7 +121,7 @@
 	''' <param name="A">左数组</param>
 	''' <param name="B">右数组</param>
 	''' <returns>比较结果数组</returns>
-	Function Gt(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
+	Public Function Gt(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
 		Return A > B
 	End Function
 	''' <summary>
@@ -131,7 +131,7 @@
 	''' <param name="A">左数组</param>
 	''' <param name="B">右数组</param>
 	''' <returns>比较结果数组</returns>
-	Function Lt(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
+	Public Function Lt(Of T)(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
 		Return A < B
 	End Function
 End Module
