@@ -18,8 +18,7 @@
     <AssemblyVersion>1.1.2.0</AssemblyVersion>
     <FileVersion>1.1.2.0</FileVersion>
     <PackageReleaseNotes>1.1.2：
-功能改进：Array(Of T) class colon
-新增函数：eq ne gt lt</PackageReleaseNotes>
+对Array(Of T)的底层实现进行了重大改进，各函数也因此有较大改动。另外特别撰写了对所有公开函数的详细文档，帮助没有MATLAB使用经验的开发者。</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
