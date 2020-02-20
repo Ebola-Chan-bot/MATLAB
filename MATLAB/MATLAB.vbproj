@@ -6,19 +6,21 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1.1.2</Version>
+    <Version>1.2.0</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt。 此外将System.Array类增强为Array(Of T)。
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/%E6%96%87%E6%A1%A3.md
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
-    <AssemblyVersion>1.1.2.0</AssemblyVersion>
-    <FileVersion>1.1.2.0</FileVersion>
-    <PackageReleaseNotes>1.1.2：
-对Array(Of T)的底层实现进行了重大改进，各函数也因此有较大改动。另外特别撰写了对所有公开函数的详细文档，帮助没有MATLAB使用经验的开发者。</PackageReleaseNotes>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <PackageReleaseNotes>1.2.0：
+新增模块：ColonExpression DataFun IArray INumeric MDecimal MDouble MSingle MUInt8 MUInt16 MUInt32 MUInt64 MInt8 MInt16 MInt32 MInt64
+新增函数：max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64
+所有模块所有函数都有重大改动。为了支持用户自己编写类实现数组运算重载，数组运算现在仅支持实现INumeric结构/类，.Net数据类型可以轻松转换为INumeric结构系列进行运算，自定义类只要实现INumeric就可以支持数组化运算。详见文档。</PackageReleaseNotes>
     <UserSecretsId>c3738a53-1a50-469d-8e99-1fe3f34a8923</UserSecretsId>
   </PropertyGroup>
 
