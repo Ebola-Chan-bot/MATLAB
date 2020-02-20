@@ -11,7 +11,7 @@
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/%E6%96%87%E6%A1%A3.md
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/文档.md
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
