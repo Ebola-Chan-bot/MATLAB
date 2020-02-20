@@ -3,7 +3,7 @@
 ''' 本库的入口类，使用时直接将<see cref="Array"/>变量赋给<see cref="Array(Of T)"/>即可，然后即可享用本库强大的数组运算功能。
 ''' </summary>
 ''' <typeparam name="T">数据类型</typeparam>
-Public NotInheritable Class Array(Of T)
+Public Class Array(Of T)
 	Implements IEnumerable(Of T), IArray
 	Friend 本体 As T()
 	Private Sizes As UInteger()
@@ -63,97 +63,6 @@ Public NotInheritable Class Array(Of T)
 		End If
 	End Sub
 	''' <summary>
-	''' 这里发生了索引转换，(0,1)=2→(1,0)=2
-	''' </summary>
-	Private Sub 赋值递归(源数组 As Array, 当前维度 As Byte, 源索引 As Integer(), 目标索引 As UInteger())
-		Dim b As Byte = NDims() - 1
-		If 当前维度 < b Then
-			For a As UInteger = 0 To GetUpperBound(当前维度)
-				源索引(b - 当前维度) = a
-				目标索引(当前维度) = a
-				赋值递归(源数组, 当前维度 + 1, 源索引, 目标索引)
-			Next
-		Else
-			For a As UInteger = 0 To GetUpperBound(当前维度)
-				源索引(b - 当前维度) = a
-				目标索引(当前维度) = a
-				SetValue(源数组.GetValue(源索引), 目标索引)
-			Next
-		End If
-	End Sub
-	''' <summary>
-	''' 此转换会创建一个新数组。调用方有义务保证元素的类型是可正确转换的。
-	''' </summary>
-	''' <param name="本体">待转换的数组</param>
-	''' <returns>尺寸相同的新数组，但元素类型可能改变</returns>
-	Public Overloads Shared Widening Operator CType(数组 As Array) As Array(Of T)
-		Dim e As Type = 数组.Class, f As Type = GetType(T), 转换器 As Func(Of Object, T)
-		If f.IsAssignableFrom(e) Then
-			转换器 = Function(输入) As T
-					  Return 输入
-				  End Function
-		Else
-			Dim g As MethodInfo() = e.GetMethods(), i As MethodInfo() = f.GetMethods
-			For Each h As MethodInfo In g
-				If h.Name = "op_Implicit" AndAlso f.IsAssignableFrom(h.ReturnType) Then
-					转换器 = Function(输入) As T
-							  Return h.Invoke(Nothing, {输入})
-						  End Function
-					Exit For
-				End If
-			Next
-			If 转换器 Is Nothing Then
-				For Each h As MethodInfo In i
-					If h.Name = "op_Implicit" AndAlso h.GetParameters(0).ParameterType.IsAssignableFrom(e) Then
-						转换器 = Function(输入) As T
-								  Return h.Invoke(Nothing, {输入})
-							  End Function
-						Exit For
-					End If
-				Next
-			End If
-			If 转换器 Is Nothing Then
-				For Each h As MethodInfo In g
-					If h.Name = "op_Explicit" AndAlso f.IsAssignableFrom(h.ReturnType) Then
-						转换器 = Function(输入) As T
-								  Return h.Invoke(Nothing, {输入})
-							  End Function
-						Exit For
-					End If
-				Next
-			End If
-			If 转换器 Is Nothing Then
-				For Each h As MethodInfo In i
-					If h.Name = "op_Explicit" AndAlso h.GetParameters(0).ParameterType.IsAssignableFrom(e) Then
-						转换器 = Function(输入) As T
-								  Return h.Invoke(Nothing, {输入})
-							  End Function
-						Exit For
-					End If
-				Next
-			End If
-			If 转换器 Is Nothing Then
-				转换器 = Function(输入) As T
-						  Return 输入
-					  End Function
-			End If
-		End If
-		Dim a As T() = (From j In 数组.AsParallel.AsOrdered Select 转换器.Invoke(j)).ToArray
-		If 数组.Rank = 1 Then
-			Return New Array(Of T)(a, a.Length)
-		Else
-			Dim b As SByte
-			For b = 数组.Rank - 1 To 0 Step -1
-				If 数组.GetUpperBound(b) > 0 Then Exit For
-			Next
-			Dim c As Byte = Math.Max(b, 0), d(c) As UInteger
-			For b = 0 To c
-				d(b) = 数组.GetLength(b)
-			Next
-			Return New Array(Of T)(a, d)
-		End If
-	End Operator
-	''' <summary>
 	''' 此转换创建一个只有一个元素的数组
 	''' </summary>
 	''' <param name="元素">唯一元素</param>
@@ -201,132 +110,58 @@ Public NotInheritable Class Array(Of T)
 		Return 数组.本体
 	End Operator
 	''' <summary>
-	''' 数组加法，每个元素的位置对应相加产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了+运算符
+	''' 数组数加法，每个元素加上常数得到新数组，数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator +(A As Array(Of T), B As T) As Array(Of T)
+		Return New Array(Of T)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) CType(c.Plus(B), T)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 数组加法，每个元素的位置对应相加产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator +(A As Array(Of T), B As Array(Of T)) As Array(Of T)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CByte(c) + CByte(d), Object), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSByte(c) + CSByte(d), Object), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUShort(c) + CUShort(d), Object), A, B)
-			Case GetType(Short)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CShort(c) + CShort(d), Object), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUInt(c) + CUInt(d), Object), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CInt(c) + CInt(d), Object), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CULng(c) + CULng(d), Object), A, B)
-			Case GetType(Long)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CLng(c) + CLng(d), Object), A, B)
-			Case GetType(Single)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSng(c) + CSng(d), Object), A, B)
-			Case GetType(Double)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDbl(c) + CDbl(d), Object), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDec(c) + CDec(d), Object), A, B)
-			Case Else
-				Return BsxFun(Of T, T, T)(Function(c As T, d As T) e.GetMethod("op_Addition").Invoke(Nothing, {c, d}), A, B)
-		End Select
+		Return BsxFun(Function(c As INumeric, d As INumeric) DirectCast(c.Plus(d), T), A, B)
 	End Operator
 	''' <summary>
-	''' 数组减法，每个元素的位置对应相减产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了-运算符
+	''' 数组数减法，每个元素减去常数得到新数组，数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator -(A As Array(Of T), B As T) As Array(Of T)
+		Return New Array(Of T)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) CType(c.Minus(B), T)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 数组减法，每个元素的位置对应相减产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator -(A As Array(Of T), B As Array(Of T)) As Array(Of T)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CByte(c) - CByte(d), Object), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSByte(c) - CSByte(d), Object), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUShort(c) - CUShort(d), Object), A, B)
-			Case GetType(Short)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CShort(c) - CShort(d), Object), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUInt(c) - CUInt(d), Object), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CInt(c) - CInt(d), Object), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CULng(c) - CULng(d), Object), A, B)
-			Case GetType(Long)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CLng(c) - CLng(d), Object), A, B)
-			Case GetType(Single)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSng(c) - CSng(d), Object), A, B)
-			Case GetType(Double)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDbl(c) - CDbl(d), Object), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDec(c) - CDec(d), Object), A, B)
-			Case Else
-				Return BsxFun(Of T, T, T)(Function(c As T, d As T) e.GetMethod("op_Subtraction").Invoke(Nothing, {c, d}), A, B)
-		End Select
+		Return BsxFun(Function(c As INumeric, d As INumeric) DirectCast(c.Minus(d), T), A, B)
 	End Operator
 	''' <summary>
-	''' 数组点乘法，每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了*运算符
+	''' 数组点乘法，每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator *(A As Array(Of T), B As Array(Of T)) As Array(Of T)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CByte(c) * CByte(d), Object), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSByte(c) * CSByte(d), Object), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUShort(c) * CUShort(d), Object), A, B)
-			Case GetType(Short)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CShort(c) * CShort(d), Object), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUInt(c) * CUInt(d), Object), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CInt(c) * CInt(d), Object), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CULng(c) * CULng(d), Object), A, B)
-			Case GetType(Long)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CLng(c) * CLng(d), Object), A, B)
-			Case GetType(Single)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSng(c) * CSng(d), Object), A, B)
-			Case GetType(Double)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDbl(c) * CDbl(d), Object), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDec(c) * CDec(d), Object), A, B)
-			Case Else
-				Return BsxFun(Of T, T, T)(Function(c As T, d As T) e.GetMethod("op_Multiply").Invoke(Nothing, {c, d}), A, B)
-		End Select
+		Return BsxFun(Function(c As INumeric, d As INumeric) DirectCast(c.Times(d), T), A, B)
 	End Operator
 	''' <summary>
-	''' 数组右除,每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须为基本数值类型或定义了/运算符
+	''' 数组数乘法，每个元素乘上常数得到新数组，数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator *(A As Array(Of T), B As T) As Array(Of T)
+		Return New Array(Of T)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) CType(c.Times(B), T)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 数组数除法，每个元素除去常数得到新数组，数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator /(A As Array(Of T), B As T) As Array(Of T)
+		Return New Array(Of T)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) CType(c.RDivide(B), T)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 数组右除,每个元素的位置对应相乘产生新数组，如果尺寸不匹配则循环填充扩展。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator /(A As Array(Of T), B As Array(Of T)) As Array(Of T)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CByte(c) / CByte(d), Object), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSByte(c) / CSByte(d), Object), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUShort(c) / CUShort(d), Object), A, B)
-			Case GetType(Short)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CShort(c) / CShort(d), Object), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CUInt(c) / CUInt(d), Object), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CInt(c) / CInt(d), Object), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CULng(c) / CULng(d), Object), A, B)
-			Case GetType(Long)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CLng(c) / CLng(d), Object), A, B)
-			Case GetType(Single)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CSng(c) / CSng(d), Object), A, B)
-			Case GetType(Double)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDbl(c) / CDbl(d), Object), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Of T, T, T)(Function(c As Object, d As Object) DirectCast(CDec(c) / CDec(d), Object), A, B)
-			Case Else
-				Return BsxFun(Of T, T, T)(Function(c As T, d As T) e.GetMethod("op_Division").Invoke(Nothing, {c, d}), A, B)
-		End Select
+		Return BsxFun(Function(c As INumeric, d As INumeric) DirectCast(c.RDivide(d), T), A, B)
+	End Operator
+	''' <summary>
+	''' 确定相等性，每个元素判断是否等于常数，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了=运算符
+	''' </summary>
+	Public Shared Operator =(A As Array(Of T), B As T) As Array(Of Boolean)
+		Return New Array(Of Boolean)(A.本体.AsParallel.AsOrdered.Select(Function(c As T) c.Equals(B)).ToArray, A.Size)
 	End Operator
 	''' <summary>
 	''' 确定相等性。对两个数组对应位置判断是否相等，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了=运算符
@@ -335,77 +170,43 @@ Public NotInheritable Class Array(Of T)
 		Return BsxFun(Function(c As T, d As T) c.Equals(d), A, B)
 	End Operator
 	''' <summary>
-	''' 确定不相等性。对两个数组对应位置判断是否不相等，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了<>运算符
+	''' 确定不相等性，每个元素判断是否不等于常数，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了&lt;&gt;运算符
+	''' </summary>
+	Public Shared Operator <>(A As Array(Of T), B As T) As Array(Of Boolean)
+		Return New Array(Of Boolean)(A.本体.AsParallel.AsOrdered.Select(Function(c As T) c.Equals(B)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 确定不相等性。对两个数组对应位置判断是否不相等，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了&lt;&gt;运算符
 	''' </summary>
 	Public Shared Operator <>(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
 		Return BsxFun(Function(c As T, d As T) Not c.Equals(d), A, B)
 	End Operator
 	''' <summary>
-	''' 确定大于。对两个数组对应位置判断左边是否大于右边，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了&gt;运算符
+	''' 确定大于。每个元素判断是否大于常数，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
-	Public Shared Operator >(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Function(c As Object, d As Object) CByte(c) > CByte(d), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Function(c As Object, d As Object) CSByte(c) > CSByte(d), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Function(c As Object, d As Object) CUShort(c) > CUShort(d), A, B)
-			Case GetType(Short)
-				Return BsxFun(Function(c As Object, d As Object) CShort(c) > CShort(d), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Function(c As Object, d As Object) CUInt(c) > CUInt(d), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Function(c As Object, d As Object) CInt(c) > CInt(d), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Function(c As Object, d As Object) CULng(c) > CULng(d), A, B)
-			Case GetType(Long)
-				Return BsxFun(Function(c As Object, d As Object) CLng(c) > CLng(d), A, B)
-			Case GetType(Single)
-				Return BsxFun(Function(c As Object, d As Object) CSng(c) > CSng(d), A, B)
-			Case GetType(Double)
-				Return BsxFun(Function(c As Object, d As Object) CDbl(c) > CDbl(d), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Function(c As Object, d As Object) CDec(c) > CDec(d), A, B)
-			Case Else
-				Return BsxFun(Of T, T, Boolean)(Function(c As T, d As T) e.GetMethod("op_GreaterThan").Invoke(Nothing, {c, d}), A, B)
-		End Select
+	Public Shared Operator >(A As Array(Of T), B As T) As Array(Of Boolean)
+		Return New Array(Of Boolean)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) c.Gt(B)).ToArray, A.Size)
 	End Operator
 	''' <summary>
-	''' 确定小于。对两个数组对应位置判断左边是否小于右边，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须为基本数值类型或定义了&lt;运算符
+	''' 确定大于。对两个数组对应位置判断左边是否大于右边，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator >(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
+		Return BsxFun(Function(c As INumeric, d As INumeric) c.Gt(d), A, B)
+	End Operator
+	''' <summary>
+	''' 确定小于。每个元素判断是否小于常数，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须实现<see cref="INumeric"/>
+	''' </summary>
+	Public Shared Operator <(A As Array(Of T), B As T) As Array(Of Boolean)
+		Return New Array(Of Boolean)(A.本体.AsParallel.AsOrdered.Select(Function(c As INumeric) c.Lt(B)).ToArray, A.Size)
+	End Operator
+	''' <summary>
+	''' 确定小于。对两个数组对应位置判断左边是否小于右边，返回<see cref="Boolean"/>结果存于新数组的对应位置。数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator <(A As Array(Of T), B As Array(Of T)) As Array(Of Boolean)
-		Dim e As Type = GetType(T)
-		Select Case e
-			Case GetType(Byte)
-				Return BsxFun(Function(c As Object, d As Object) CByte(c) < CByte(d), A, B)
-			Case GetType(SByte)
-				Return BsxFun(Function(c As Object, d As Object) CSByte(c) < CSByte(d), A, B)
-			Case GetType(UShort)
-				Return BsxFun(Function(c As Object, d As Object) CUShort(c) < CUShort(d), A, B)
-			Case GetType(Short)
-				Return BsxFun(Function(c As Object, d As Object) CShort(c) < CShort(d), A, B)
-			Case GetType(UInteger)
-				Return BsxFun(Function(c As Object, d As Object) CUInt(c) < CUInt(d), A, B)
-			Case GetType(Integer)
-				Return BsxFun(Function(c As Object, d As Object) CInt(c) < CInt(d), A, B)
-			Case GetType(ULong)
-				Return BsxFun(Function(c As Object, d As Object) CULng(c) < CULng(d), A, B)
-			Case GetType(Long)
-				Return BsxFun(Function(c As Object, d As Object) CLng(c) < CLng(d), A, B)
-			Case GetType(Single)
-				Return BsxFun(Function(c As Object, d As Object) CSng(c) < CSng(d), A, B)
-			Case GetType(Double)
-				Return BsxFun(Function(c As Object, d As Object) CDbl(c) < CDbl(d), A, B)
-			Case GetType(Decimal)
-				Return BsxFun(Function(c As Object, d As Object) CDec(c) < CDec(d), A, B)
-			Case Else
-				Return BsxFun(Of T, T, Boolean)(Function(c As T, d As T) e.GetMethod("op_LessThan").Invoke(Nothing, {c, d}), A, B)
-		End Select
+		Return BsxFun(Function(c As INumeric, d As INumeric) c.Lt(d), A, B)
 	End Operator
-	Private Sub SubsRAGet递归(目标数组 As Array(Of T), 当前维度 As Byte, 源索引 As UInteger(), 目标索引 As UInteger(), 索引映射 As Integer()())
-		Dim b As Integer() = 索引映射(当前维度)
+	Private Sub SubsRAGet递归(目标数组 As Array(Of T), 当前维度 As Byte, 源索引 As UInteger(), 目标索引 As UInteger(), 索引映射 As UInteger()())
+		Dim b As UInteger() = 索引映射(当前维度)
 		If 当前维度 < 目标数组.NDims - 1 Then
 			For a As Integer = 0 To 目标数组.GetUpperBound(当前维度)
 				源索引(当前维度) = b(a)
@@ -420,8 +221,8 @@ Public NotInheritable Class Array(Of T)
 			Next
 		End If
 	End Sub
-	Private Sub SubsRASet递归(源数组 As Array(Of T), 当前维度 As Byte, 源索引 As UInteger(), 目标索引 As UInteger(), 索引映射 As Integer()())
-		Dim b As Integer() = 索引映射(当前维度)
+	Private Sub SubsRASet递归(源数组 As Array(Of T), 当前维度 As Byte, 源索引 As UInteger(), 目标索引 As UInteger(), 索引映射 As UInteger()())
+		Dim b As UInteger() = 索引映射(当前维度)
 		If 当前维度 < 源数组.NDims - 1 Then
 			For a As Integer = 0 To 源数组.GetUpperBound(当前维度)
 				源索引(当前维度) = a
@@ -437,23 +238,74 @@ Public NotInheritable Class Array(Of T)
 		End If
 	End Sub
 	''' <summary>
-	''' 取多维数组的多个元素。此属性不具有健壮性，调用方应保证数组兼容此下标。
+	''' 此重载用于兼容字面常量，为了减少类型转换的性能消耗请尽可能使用<see cref="SubsRA(UInteger()())"/>重载。取多维数组的多个元素。此属性不具有健壮性，调用方应保证数组兼容此下标。
 	''' </summary>
 	''' <param name="subs">欲取元素的各维下标范围</param>
 	''' <returns>所取元素拼接成数组</returns>
 	Default Property SubsRA(subs As Integer()()) As Array(Of T)
 		Get
-			Dim b As Byte = subs.GetUpperBound(0), a(b) As UInteger
+			Return SubsRA(subs.Select(Function(a As Integer()) a.Select(Function(b As Integer) CUInt(b)).ToArray).ToArray)
+		End Get
+		Set(value As Array(Of T))
+			SubsRA(subs.Select(Function(a As Integer()) a.Select(Function(b As Integer) CUInt(b)).ToArray).ToArray) = value
+		End Set
+	End Property
+	''' <summary>
+	''' 取多维数组的多个元素。此属性不具有健壮性，调用方应保证数组兼容此下标。
+	''' </summary>
+	''' <param name="subs">欲取元素的各维下标范围</param>
+	''' <returns>所取元素拼接成数组</returns>
+	Default Property SubsRA(subs As UInteger()()) As Array(Of T)
+		Get
+			Dim b As Byte = subs.GetUpperBound(0), a(b) As UInteger, e(b) As UInteger
 			For c As Byte = 0 To b
 				a(c) = subs(c).Length
+				e(c) = subs(c)(0)
 			Next
-			Dim d As New Array(Of T)(a), e(NDims() - 1) As UInteger, f(d.NDims - 1) As UInteger
+			Dim d As New Array(Of T)(a), f(d.NDims - 1) As UInteger
 			SubsRAGet递归(d, 0, e, f, subs)
 			Return d
 		End Get
 		Set(value As Array(Of T))
-			Dim a(value.NDims - 1) As UInteger, b(NDims() - 1) As UInteger
+			Dim a(value.NDims - 1) As UInteger, b As UInteger() = subs.Select(Function(c As UInteger()) c(0)).ToArray
 			SubsRASet递归(value, 0, a, b, subs)
+		End Set
+	End Property
+	''' <summary>
+	''' 取多维数组的多个元素，使用<see cref="ColonExpression"/>以支持<see cref="[End]"/>索引
+	''' </summary>
+	''' <param name="subs">欲取元素的各维下标范围</param>
+	''' <returns>所取元素拼接成数组</returns>
+	Default Property SubsRA(subs As ColonExpression()) As Array(Of T)
+		Get
+			Dim b As Byte = subs.Length - 1, c(b)() As UInteger
+			For a As Byte = 0 To subs.Length - 1
+				c(a) = subs(a).ToIndex(Size(a) - 1)
+			Next
+			Return SubsRA(c)
+		End Get
+		Set(value As Array(Of T))
+			Dim b As Byte = subs.Length - 1, c(b)() As UInteger
+			For a As Byte = 0 To subs.Length - 1
+				c(a) = subs(a).ToIndex(Size(a) - 1)
+			Next
+			SubsRA(c) = value
+		End Set
+	End Property
+	''' <summary>
+	''' 取向量的多个元素，使用<see cref="ColonExpression"/>以支持<see cref="[End]"/>索引
+	''' </summary>
+	''' <param name="subs">欲取元素的线性索引</param>
+	''' <returns>所取元素拼接成向量</returns>
+	Default Property SubsRA(subs As ColonExpression) As Array(Of T)
+		Get
+			Return subs.ToIndex(Numel - 1).Select(Function(a As UInteger) 本体(a)).ToArray
+		End Get
+		Set(value As Array(Of T))
+			Dim a As UInteger() = subs.ToIndex(Numel - 1)
+			For b As UInteger = 0 To a.Length - 1
+				本体(a(b)) = value.本体(b)
+			Next
 		End Set
 	End Property
 	''' <summary>
@@ -625,7 +477,7 @@ Public NotInheritable Class Array(Of T)
 		For a As Byte = 0 To g
 			e(a) = a
 		Next
-		e = e.Except(累积维度)
+		e = e.Except(累积维度).ToArray
 		Dim c As New Array(Of TOut)(b), d(NDims() - 1) As UInteger, f(c.NDims - 1) As UInteger
 		拆分递归(c, 0, d, f, e, 累积维度, 累积器)
 		Return c
@@ -704,7 +556,7 @@ Public NotInheritable Class Array(Of T)
 	Function GetUpperBound(dimension As Byte) As UInteger
 		Return Sizes(dimension) - 1
 	End Function
-	Friend Sub New(本体 As T(), ParamArray 尺寸 As UInteger())
+	Sub New(本体 As T(), ParamArray 尺寸 As UInteger())
 		Reshape(尺寸)
 		Me.本体 = 本体
 	End Sub
@@ -768,8 +620,55 @@ Public NotInheritable Class Array(Of T)
 	''' <typeparam name="TOut">输出类型</typeparam>
 	''' <param name="转换器">转换函数</param>
 	''' <returns>返回值</returns>
-	Function Cast(Of TOut)(Optional [like] As Array(Of TOut) = Nothing) As Array(Of TOut)
-		Return New Array(Of TOut)(本体.Select(Function(a As Object) CType(a, TOut)).ToArray, Size.ToArray)
+	Function Cast(Of TOut)() As IArray
+		Select Case GetType(TOut)
+			Case GetType(Decimal)
+				Return NDecimal()
+			Case GetType(Double)
+				Return NDouble()
+			Case GetType(Single)
+				Return NSingle()
+			Case GetType(SByte)
+				Return NSByte()
+			Case GetType(Short)
+				Return NShort()
+			Case GetType(Integer)
+				Return NInteger()
+			Case GetType(Long)
+				Return NLong()
+			Case GetType(Byte)
+				Return NByte()
+			Case GetType(UShort)
+				Return NUShort()
+			Case GetType(UInteger)
+				Return NUInteger()
+			Case GetType(ULong)
+				Return NULong()
+			Case GetType(MDecimal)
+				Return [Decimal]()
+			Case GetType(MDouble)
+				Return [Double]()
+			Case GetType(MSingle)
+				Return [Single]()
+			Case GetType(MInt8)
+				Return Int8()
+			Case GetType(MInt16)
+				Return Int16()
+			Case GetType(MInt32)
+				Return Int32()
+			Case GetType(MInt64)
+				Return Int64()
+			Case GetType(MUInt8)
+				Return UInt8()
+			Case GetType(MUInt16)
+				Return UInt16()
+			Case GetType(MUInt32)
+				Return UInt32()
+			Case GetType(MUInt64)
+				Return UInt64()
+			Case Else
+				Return New Array(Of TOut)(本体.Select(Function(a As Object) CType(a, TOut)).ToArray, Size)
+		End Select
 	End Function
 
 	Private Function IArray_循环割补(ParamArray 尺寸() As UInteger) As IArray Implements IArray.循环割补
@@ -796,6 +695,183 @@ Public NotInheritable Class Array(Of T)
 			Return Sizes([dim])
 		Else
 			Return 1
+		End If
+	End Function
+	Public Function Min() As T
+		Return 本体.AsParallel.AsUnordered.Aggregate(Function(a As INumeric, b As INumeric) a.Min(b))
+	End Function
+	Public Function Min(ParamArray vecdim As Byte()) As Array(Of T)
+		Return 累积降维(New Min累积器(Of T), vecdim)
+	End Function
+	Public Function Max() As T
+		Return 本体.AsParallel.AsUnordered.Aggregate(Function(a As INumeric, b As INumeric) a.Max(b))
+	End Function
+	Public Function Max(ParamArray vecdim As Byte()) As Array(Of T)
+		Return 累积降维(New Max累积器(Of T), vecdim)
+	End Function
+	Public Function [Decimal]() As Array(Of MDecimal) Implements IArray.Decimal
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MDecimal)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MDecimal(CDec(a))).ToArray, Size)
+		Else
+			Return New Array(Of MDecimal)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MDecimal(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function [Double]() As Array(Of MDouble) Implements IArray.Double
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MDouble)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MDouble(CDbl(a))).ToArray, Size)
+		Else
+			Return New Array(Of MDouble)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MDouble(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function [Single]() As Array(Of MSingle) Implements IArray.Single
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MSingle)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MSingle(CSng(a))).ToArray, Size)
+		Else
+			Return New Array(Of MSingle)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MSingle(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function Int8() As Array(Of MInt8) Implements IArray.Int8
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt8)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MInt8(CSByte(a))).ToArray, Size)
+		Else
+			Return New Array(Of MInt8)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MInt8(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function Int16() As Array(Of MInt16) Implements IArray.Int16
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt16)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MInt16(CShort(a))).ToArray, Size)
+		Else
+			Return New Array(Of MInt16)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MInt16(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function Int32() As Array(Of MInt32) Implements IArray.Int32
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt32)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MInt32(CInt(a))).ToArray, Size)
+		Else
+			Return New Array(Of MInt32)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MInt32(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function Int64() As Array(Of MInt64) Implements IArray.Int64
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt64)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MInt64(CLng(a))).ToArray, Size)
+		Else
+			Return New Array(Of MInt64)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MInt64(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function UInt8() As Array(Of MUInt8) Implements IArray.UInt8
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt8)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MUInt8(CByte(a))).ToArray, Size)
+		Else
+			Return New Array(Of MUInt8)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MUInt8(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function UInt16() As Array(Of MUInt16) Implements IArray.UInt16
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt16)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MUInt16(CUShort(a))).ToArray, Size)
+		Else
+			Return New Array(Of MUInt16)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MUInt16(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function UInt32() As Array(Of MUInt32) Implements IArray.UInt32
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt32)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MUInt32(CUInt(a))).ToArray, Size)
+		Else
+			Return New Array(Of MUInt32)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MUInt32(a)).ToArray, Size)
+		End If
+	End Function
+	Public Function UInt64() As Array(Of MUInt64) Implements IArray.UInt64
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt64)(本体.AsParallel.AsOrdered.Select(Function(a As Object) New MUInt64(CULng(a))).ToArray, Size)
+		Else
+			Return New Array(Of MUInt64)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) New MUInt64(a)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NDecimal() As Array(Of Decimal) Implements IArray.NDecimal
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Decimal)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CDec(a)).ToArray, Size)
+		Else
+			Return New Array(Of Decimal)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CDec(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NDouble() As Array(Of Double) Implements IArray.NDouble
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Double)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CDbl(a)).ToArray, Size)
+		Else
+			Return New Array(Of Double)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CDbl(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NSingle() As Array(Of Single) Implements IArray.NSingle
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Single)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CSng(a)).ToArray, Size)
+		Else
+			Return New Array(Of Single)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CSng(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NSByte() As Array(Of SByte) Implements IArray.NSByte
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of SByte)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CSByte(a)).ToArray, Size)
+		Else
+			Return New Array(Of SByte)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CSByte(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NShort() As Array(Of Short) Implements IArray.NShort
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Short)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CShort(a)).ToArray, Size)
+		Else
+			Return New Array(Of Short)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CShort(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NInteger() As Array(Of Integer) Implements IArray.NInteger
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Integer)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CInt(a)).ToArray, Size)
+		Else
+			Return New Array(Of Integer)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CInt(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NLong() As Array(Of Long) Implements IArray.NLong
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Long)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CLng(a)).ToArray, Size)
+		Else
+			Return New Array(Of Long)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CLng(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NByte() As Array(Of Byte) Implements IArray.NByte
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of Byte)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CByte(a)).ToArray, Size)
+		Else
+			Return New Array(Of Byte)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CByte(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NUShort() As Array(Of UShort) Implements IArray.NUShort
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of UShort)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CUShort(a)).ToArray, Size)
+		Else
+			Return New Array(Of UShort)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CUShort(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NUInteger() As Array(Of UInteger) Implements IArray.NUInteger
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of UInteger)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CUInt(a)).ToArray, Size)
+		Else
+			Return New Array(Of UInteger)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CUInt(a.RawData)).ToArray, Size)
+		End If
+	End Function
+
+	Public Function NULong() As Array(Of ULong) Implements IArray.NULong
+		If GetType(T).GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of ULong)(本体.AsParallel.AsOrdered.Select(Function(a As Object) CULng(a)).ToArray, Size)
+		Else
+			Return New Array(Of ULong)(本体.AsParallel.AsOrdered.Select(Function(a As INumeric) CULng(a.RawData)).ToArray, Size)
 		End If
 	End Function
 End Class

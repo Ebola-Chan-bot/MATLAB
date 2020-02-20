@@ -19,6 +19,7 @@
     <FileVersion>1.1.2.0</FileVersion>
     <PackageReleaseNotes>1.1.2：
 对Array(Of T)的底层实现进行了重大改进，各函数也因此有较大改动。另外特别撰写了对所有公开函数的详细文档，帮助没有MATLAB使用经验的开发者。</PackageReleaseNotes>
+    <UserSecretsId>c3738a53-1a50-469d-8e99-1fe3f34a8923</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -141,14 +141,14 @@ Public Module ImageSci
 	ReadOnly Property GUID_WICPixelFormat16bppCbQuantizedDctCoefficients As New Guid(&HD2C4FF61, &H56A5, &H49C2, &H8B, &H5C, &H4C, &H19, &H25, &H96, &H48, &H37)
 	ReadOnly Property GUID_WICPixelFormat16bppCrQuantizedDctCoefficients As New Guid(&H2FE354F0, &H1680, &H42D8, &H92, &H31, &HE7, &H3C, &H5, &H65, &HBF, &HC1)
 	''' <summary>
-	''' 不同于MATLAB，无论图片文件本身格式为何，此函数总是将返回高×宽×RGB[×帧]形式的<see cref="Byte"/>数组，即模块中列出的<see cref="GUID_WICPixelFormat32bppRGBA"/>格式。列出的其它格式只表示这些格式的图片文件可以被正确读取。
+	''' 不同于MATLAB，无论图片文件本身格式为何，此函数总是将返回高×宽×RGB[×帧]形式的<see cref="MUInt8"/>数组，即模块中列出的<see cref="GUID_WICPixelFormat32bppRGBA"/>格式。列出的其它格式只表示这些格式的图片文件可以被正确读取。
 	''' </summary>
 	''' <param name="filename">图片文件路径</param>
 	''' <param name="transparency">可选返回Alpha通道。如果返回多帧，将安排在第3维。</param>
 	''' <param name="Frames">对于多帧图像（如GIF），选择返回的帧序号。不同于MATLAB，从0开始。如果返回多帧，将安排在第4维。</param>
 	''' <returns>高×宽×RGB[×帧]形式的Byte数组</returns>
 	''' <exception cref="ComException"/>
-	Public Function ImRead(filename As String, Optional ByRef transparency As Array(Of Byte) = Nothing, Optional Frames As UInteger() = Nothing) As Array(Of Byte)
+	Public Function ImRead(filename As String, Optional ByRef transparency As Array(Of MUInt8) = Nothing, Optional Frames As UInteger() = Nothing) As Array(Of MUInt8)
 		Static 图像工厂 As IntPtr
 		ComException.检查(CoCreateInstance(New Guid("317D06E8-5F24-433D-BDF7-79CE68D8ABC2"), Nothing, TagCLSCTX.CLSCTX_INPROC_SERVER, New Guid("ec5ec8a9-c395-4314-9c77-54d7a935ff70"), 图像工厂), "Ole32：创建Com实例失败")
 		Dim a As IntPtr
@@ -161,8 +161,8 @@ Public Module ImageSci
 			ComException.检查(IWICBitmapSource_GetSize_Proxy(a, b, c), "WindowsCodecs：获取尺寸失败")
 			Dim e(b * c * 4 - 1) As Byte
 			ComException.检查(IWICBitmapSource_CopyPixels_Proxy(a, New WICRect With {.X = 0, .Y = 0, .Height = c, .Width = b}, b * 4, e.Length, e), "WindowsCodecs：复制像素失败")
-			Dim d As New Array(Of Byte)(c, b, 3), i As IEnumerator(Of Byte) = e.AsEnumerable.GetEnumerator
-			transparency = New Array(Of Byte)(c, b)
+			Dim d As New Array(Of MUInt8)(c, b, 3), i As IEnumerator(Of Byte) = e.AsEnumerable.GetEnumerator
+			transparency = New Array(Of MUInt8)(c, b)
 			For f As Integer = 0 To c - 1
 				For g As Integer = 0 To b - 1
 					For h As Byte = 0 To 2
@@ -182,8 +182,8 @@ Public Module ImageSci
 			ComException.检查(IWICBitmapSource_GetSize_Proxy(l, b, c), "WindowsCodecs：获取尺寸失败")
 			Dim e(b * c * 4 - 1) As Byte, k As New WICRect With {.X = 0, .Y = 0, .Height = c, .Width = b}
 			ComException.检查(IWICBitmapSource_CopyPixels_Proxy(l, k, b * 4, e.Length, e), "WindowsCodecs：复制像素失败")
-			Dim d As New Array(Of Byte)(c, b, 3, Frames.Length), i As IEnumerator(Of Byte)
-			transparency = New Array(Of Byte)(c, b, Frames.Length)
+			Dim d As New Array(Of MUInt8)(c, b, 3, Frames.Length), i As IEnumerator(Of Byte)
+			transparency = New Array(Of MUInt8)(c, b, Frames.Length)
 			For j As Integer = 0 To Frames.GetUpperBound(0)
 				IWICBitmapDecoder_GetFrame_Proxy(a, Frames(j), l)
 				WICConvertBitmapSource(GUID_WICPixelFormat32bppRGBA, l, l)

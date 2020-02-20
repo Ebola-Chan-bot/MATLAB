@@ -28,8 +28,8 @@ Public Module DataTypes
 	''' <typeparam name="newclass">目标类</typeparam>
 	''' <param name="A">要转换的数组</param>
 	''' <param name="[like]">将 A 转换为与此相同的数据类型</param>
-	Public Function Cast(Of TIn, newclass)(A As Array(Of TIn), Optional [like] As Array(Of newclass) = Nothing) As Array(Of newclass)
-		Return A.Cast([like])
+	Public Function Cast(Of TIn, newclass)(A As Array(Of TIn)) As Array(Of newclass)
+		Return A.Cast(Of newclass)
 	End Function
 	''' <summary>
 	''' 这里不会创建新数组，因此可以用底层的<see cref="Array"/>
@@ -84,5 +84,434 @@ Public Module DataTypes
 		Dim b As IArray() = 适配(A), d As New Array(Of T)(b(0).Size.ToArray), e As T() = d.本体
 		Parallel.For(0, e.Length, Sub(c As Integer) e(c) = func.Invoke(b.Select(Function(f As IArray) f.GetValue(c)).ToArray))
 		Return d
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为十进位。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Decimal](X As Decimal) As Array(Of MDecimal)
+		Return New MDecimal(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为十进位。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Decimal](Of T As INumeric)(X As T) As Array(Of MDecimal)
+		Return New MDecimal(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为十进位。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Decimal](X As IArray) As Array(Of MDecimal)
+		Return X.Decimal
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为十进位。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function [Decimal](X As Array) As Array(Of MDecimal)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MDecimal)((From a In X.AsParallel.AsOrdered Select New MDecimal(CDec(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MDecimal)((From a As INumeric In X.AsParallel.AsOrdered Select New MDecimal(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为十进位。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Decimal](X As IToVector) As Array(Of MDecimal)
+		Return X.ToMDecimal
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为双精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Double](X As Double) As Array(Of MDouble)
+		Return New MDouble(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为双精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Double](Of T As INumeric)(X As T) As Array(Of MDouble)
+		Return New MDouble(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为双精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Double](X As IArray) As Array(Of MDouble)
+		Return X.Double
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为双精度。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function [Double](X As Array) As Array(Of MDouble)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MDouble)((From a In X.AsParallel.AsOrdered Select New MDouble(CDbl(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MDouble)((From a As INumeric In X.AsParallel.AsOrdered Select New MDouble(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为双精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Double](X As IToVector) As Array(Of MDouble)
+		Return X.ToMDouble
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Single](X As Single) As Array(Of MSingle)
+		Return New MSingle(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Single](Of T As INumeric)(X As T) As Array(Of MSingle)
+		Return New MSingle(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Single](X As IArray) As Array(Of MSingle)
+		Return X.Single
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function [Single](X As Array) As Array(Of MSingle)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MSingle)((From a In X.AsParallel.AsOrdered Select New MSingle(CSng(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MSingle)((From a As INumeric In X.AsParallel.AsOrdered Select New MSingle(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Single](X As IToVector) As Array(Of MSingle)
+		Return X.ToMSingle
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int8(X As SByte) As Array(Of MInt8)
+		Return New MInt8(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int8(Of T As INumeric)(X As T) As Array(Of MInt8)
+		Return New MInt8(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int8(X As IArray) As Array(Of MInt8)
+		Return X.Int8
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function Int8(X As Array) As Array(Of MInt8)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt8)((From a In X.AsParallel.AsOrdered Select New MInt8(CSByte(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MInt8)((From a As INumeric In X.AsParallel.AsOrdered Select New MInt8(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Int8](X As IToVector) As Array(Of MInt8)
+		Return X.ToMInt8
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int16(X As Short) As Array(Of MInt16)
+		Return New MInt16(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int16(Of T As INumeric)(X As T) As Array(Of MInt16)
+		Return New MInt16(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int16(X As IArray) As Array(Of MInt16)
+		Return X.Int16
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function Int16(X As Array) As Array(Of MInt16)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt16)((From a In X.AsParallel.AsOrdered Select New MInt16(CShort(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MInt16)((From a As INumeric In X.AsParallel.AsOrdered Select New MInt16(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Int16](X As IToVector) As Array(Of MInt16)
+		Return X.ToMInt16
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int32(X As Integer) As Array(Of MInt32)
+		Return New MInt32(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int32(Of T As INumeric)(X As T) As Array(Of MInt32)
+		Return New MInt32(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int32(X As IArray) As Array(Of MInt32)
+		Return X.Int32
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function Int32(X As Array) As Array(Of MInt32)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt32)((From a In X.AsParallel.AsOrdered Select New MInt32(CInt(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MInt32)((From a As INumeric In X.AsParallel.AsOrdered Select New MInt32(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Int32](X As IToVector) As Array(Of MInt32)
+		Return X.ToMInt32
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int64(X As Long) As Array(Of MInt64)
+		Return New MInt64(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int64(Of T As INumeric)(X As T) As Array(Of MInt64)
+		Return New MInt64(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function Int64(X As IArray) As Array(Of MInt64)
+		Return X.Int64
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function Int64(X As Array) As Array(Of MInt64)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MInt64)((From a In X.AsParallel.AsOrdered Select New MInt64(CLng(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MInt64)((From a As INumeric In X.AsParallel.AsOrdered Select New MInt64(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [Int64](X As IToVector) As Array(Of MInt64)
+		Return X.ToMInt64
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt8(X As Byte) As Array(Of MUInt8)
+		Return New MUInt8(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt8(Of T As INumeric)(X As T) As Array(Of MUInt8)
+		Return New MUInt8(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt8(X As IArray) As Array(Of MUInt8)
+		Return X.UInt8
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function UInt8(X As Array) As Array(Of MUInt8)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt8)((From a In X.AsParallel.AsOrdered Select New MUInt8(CByte(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MUInt8)((From a As INumeric In X.AsParallel.AsOrdered Select New MUInt8(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt8"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [UInt8](X As IToVector) As Array(Of MUInt8)
+		Return X.ToMUInt8
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt16(X As UShort) As Array(Of MUInt16)
+		Return New MUInt16(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt16(Of T As INumeric)(X As T) As Array(Of MUInt16)
+		Return New MUInt16(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt16(X As IArray) As Array(Of MUInt16)
+		Return X.UInt16
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function UInt16(X As Array) As Array(Of MUInt16)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt16)((From a In X.AsParallel.AsOrdered Select New MUInt16(CUShort(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MUInt16)((From a As INumeric In X.AsParallel.AsOrdered Select New MUInt16(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt16"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [UInt16](X As IToVector) As Array(Of MUInt16)
+		Return X.ToMUInt16
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt32(X As UInteger) As Array(Of MUInt32)
+		Return New MUInt32(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt32(Of T As INumeric)(X As T) As Array(Of MUInt32)
+		Return New MUInt32(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt32(X As IArray) As Array(Of MUInt32)
+		Return X.UInt32
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function UInt32(X As Array) As Array(Of MUInt32)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt32)((From a In X.AsParallel.AsOrdered Select New MUInt32(CUInt(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MUInt32)((From a As INumeric In X.AsParallel.AsOrdered Select New MUInt32(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt32"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function [UInt32](X As IToVector) As Array(Of MUInt32)
+		Return X.ToMUInt32
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt64(X As ULong) As Array(Of MUInt64)
+		Return New MUInt64(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt64(Of T As INumeric)(X As T) As Array(Of MUInt64)
+		Return New MUInt64(X)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt64(X As IArray) As Array(Of MUInt64)
+		Return X.UInt64
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组</param>
+	Public Function UInt64(X As Array) As Array(Of MUInt64)
+		If X.Class.GetInterface("INumeric") Is Nothing Then
+			Return New Array(Of MUInt64)((From a In X.AsParallel.AsOrdered Select New MUInt64(CULng(a))).ToArray, X.Size)
+		Else
+			Return New Array(Of MUInt64)((From a As INumeric In X.AsParallel.AsOrdered Select New MUInt64(a)).ToArray, X.Size)
+		End If
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为<see cref="MUInt64"/>类型。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function UInt64(X As IToVector) As Array(Of MUInt64)
+		Return X.ToMUInt64
 	End Function
 End Module

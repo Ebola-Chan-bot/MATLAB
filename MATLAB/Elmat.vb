@@ -46,16 +46,16 @@ Public Module ElMat
 	''' <typeparam name="typename">要创建的数据类型（类）</typeparam>
 	''' <param name="sz">每个维度的大小</param>
 	''' <returns>全零数组</returns>
-	Public Function Zeros(Of typename)(ParamArray sz As UInteger()) As Array(Of typename)
+	Public Function Zeros(Of typename As INumeric)(ParamArray sz As UInteger()) As Array(Of typename)
 		Return New Array(Of typename)(sz)
 	End Function
 	''' <summary>
-	''' 返回由零组成并且数据类型为<see cref="Double"/>的 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Zeros(2, 3)</c>将返回一个 2×3 矩阵。
+	''' 返回由零组成并且数据类型为<see cref="MDouble"/>的 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Zeros(2, 3)</c>将返回一个 2×3 矩阵。
 	''' </summary>
 	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全零<see cref="Double"/>数组</returns>
-	Public Function Zeros(ParamArray sz As UInteger()) As Array(Of Double)
-		Return Zeros(Of Double)(sz)
+	''' <returns>全零<see cref="MDouble"/>数组</returns>
+	Public Function Zeros(ParamArray sz As UInteger()) As Array(Of MDouble)
+		Return Zeros(Of MDouble)(sz)
 	End Function
 	''' <summary>
 	''' 返回一个由 1 组成并且数据类型为 classname 的 sz1×...×szN 数组。
@@ -63,17 +63,19 @@ Public Module ElMat
 	''' <typeparam name="classname">输出类</typeparam>
 	''' <param name="sz">每个维度的大小</param>
 	''' <returns>全1数组</returns>
-	Public Function Ones(Of classname)(ParamArray sz As UInteger()) As Array(Of classname)
+	Public Function Ones(Of classname As {INumeric, New})(ParamArray sz As UInteger()) As Array(Of classname)
 		Ones = New Array(Of classname)(sz)
-		Ones.本体 = Enumerable.Repeat(Of classname)(DirectCast(1, Object), Ones.Numel).ToArray
+		Dim a As New classname
+		a.SetValue(1)
+		Ones.本体 = Enumerable.Repeat(a, Ones.Numel).ToArray
 	End Function
 	''' <summary>
-	''' 返回由 1 组成的 sz1×...×szN <see cref="Double"/>数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Ones(2, 3)</c>返回由 1 组成的 2×3 数组。
+	''' 返回由 1 组成的 sz1×...×szN <see cref="MDouble"/>数组，其中 sz1,...,szN 指示每个维度的大小。例如，<c>Ones(2, 3)</c>返回由 1 组成的 2×3 数组。
 	''' </summary>
 	''' <param name="sz">每个维度的大小</param>
-	''' <returns>全1<see cref="Double"/>数组</returns>
-	Public Function Ones(ParamArray sz As UInteger()) As Array(Of Double)
-		Return Ones(Of Double)(sz)
+	''' <returns>全1<see cref="MDouble"/>数组</returns>
+	Public Function Ones(ParamArray sz As UInteger()) As Array(Of MDouble)
+		Return Ones(Of MDouble)(sz)
 	End Function
 	''' <summary>
 	''' 这里不会创建新数组，因此可以用底层的<see cref="Array"/>
@@ -183,6 +185,13 @@ Public Module ElMat
 	''' <returns>数组大小</returns>
 	Public Function Size(Of T)(A As Array(Of T), [dim] As Byte) As UInteger
 		Return A.Size([dim])
+	End Function
+	<Runtime.CompilerServices.Extension> Public Function Size(A As Array) As UInteger()
+		Dim c As Byte = A.Rank - 1, d(c) As UInteger
+		For b As Byte = 0 To c
+			d(b) = A.GetLength(b)
+		Next
+		Return d
 	End Function
 	''' <summary>
 	''' 返回数组 A 的维数。函数会忽略<c>Size(A, [dim]) = 1</c>所针对的尾部单一维度。
