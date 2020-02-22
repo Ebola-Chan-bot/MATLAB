@@ -65,20 +65,18 @@ Public Module DataTypes
 	''' </summary>
 	Function 适配(ParamArray 数组 As IArray()) As IArray()
 		If 匹配(数组) Then Return 数组
-		Dim b(数组.AsParallel.AsUnordered.Aggregate(1, Function(维数 As Byte, a As IArray) Math.Max(维数, a.NDims)) - 1) As UInteger
+		Dim b(数组.Aggregate(1, Function(维数 As Byte, a As IArray) Math.Max(维数, a.NDims)) - 1) As UInteger
 		Parallel.For(0, b.Length, Sub(c As Integer)
 									  b(c) = 数组.Aggregate(Of UInteger)(1, Function(长度 As UInteger, a As IArray) Math.Max(长度, a.Size(c)))
 								  End Sub)
 		Return 数组.AsParallel.AsOrdered.Select(Function(a As IArray) a.循环割补(b)).ToArray
 	End Function
 	''' <summary>
-	''' 将 func 应用于数组 A1,...,An 的元素，因此 B(i) = func(A1(i),...,An(i))。函数 func 必须接受 n 个输入参数并返回一个标量。数组 A1,...,An 的大小如果不同，较大的数组会被保留，较小的数组则会被循环填补空缺。
+	''' 将 func 应用于数组 A1,...,An 的元素，因此 B(i) = func(A1(i),...,An(i))。函数 func 必须接受 n 个输入参数并返回一个标量。数组 A1,...,An 的大小如果不同，较大的数组会被保留，较小的数组则会被循环填补空缺。这个函数不擅长处理对大规模数组每个元素进行的少量运算，例如数组之间的简单算术运算请勿使用此函数。
 	''' </summary>
-	''' <typeparam name="TIn">输入数组元素类型</typeparam>
-	''' <typeparam name="TOut">输出数组元素类型</typeparam>
+	''' <typeparam name="T">输出数组元素类型</typeparam>
 	''' <param name="func">要执行的函数</param>
 	''' <param name="A">输入数组</param>
-	''' <param name="ErrorHandler">错误处理方法</param>
 	''' <returns>输出数组</returns>
 	Public Function ArrayFun(Of T)(func As Func(Of Object(), T), ParamArray A As IArray()) As Array(Of T)
 		Dim b As IArray() = 适配(A), d As New Array(Of T)(b(0).Size.ToArray), e As T() = d.本体

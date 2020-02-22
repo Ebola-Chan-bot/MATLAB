@@ -1,11 +1,20 @@
 ﻿Public Structure MUInt64
 	Implements INumeric
 	Private 数值 As ULong
+	Shared ReadOnly MinValue As New MUInt64(ULong.MinValue), MaxValue As New MUInt64(ULong.MaxValue)
 	Sub New(数值 As ULong)
 		Me.数值 = 数值
 	End Sub
 	Sub New(数值 As INumeric)
-		Me.数值 = 数值.RawData
+		If 数值.Lt(MinValue) Then
+			Me.数值 = ULong.MinValue
+		ElseIf Double.IsNaN(数值.RawData) Then
+			Me.数值 = 0
+		ElseIf 数值.Gt(MaxValue) Then
+			Me.数值 = ULong.MaxValue
+		Else
+			Me.数值 = 数值.RawData
+		End If
 	End Sub
 	Public ReadOnly Property RawData As Object Implements INumeric.RawData
 		Get

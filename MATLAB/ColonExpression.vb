@@ -27,9 +27,8 @@ Public Structure ColonExpression
 		Me.结束 = New MDouble(结束)
 	End Sub
 	Public Function ToIndex([End] As UInteger) As UInteger()
-		If 开始.Equals(Ops.End) Then 开始 = New MInt32([End])
-		If 结束.Equals(Ops.End) Then 结束 = New MInt32([End])
-		Return ToUInteger()
+		Dim a As INumeric = If(开始.Equals(Ops.End), New MInt32([End]), 开始), b As INumeric = If(结束.Equals(Ops.End), New MInt32([End]), 结束)
+		Return New ColonExpression(a, 公差, b).ToUInteger
 	End Function
 	Public Function ToMDecimal() As MDecimal() Implements IToVector.ToMDecimal
 		Return AsParallel.AsOrdered.[Select](Function(a As INumeric) New MDecimal(a)).ToArray

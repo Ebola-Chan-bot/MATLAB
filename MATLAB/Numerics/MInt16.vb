@@ -1,11 +1,20 @@
 ﻿Public Structure MInt16
 	Implements INumeric
 	Private 数值 As Short
+	Shared ReadOnly MinValue As New MInt16(Short.MinValue), MaxValue As New MInt16(Short.MaxValue)
 	Sub New(数值 As Short)
 		Me.数值 = 数值
 	End Sub
 	Sub New(数值 As INumeric)
-		Me.数值 = 数值.RawData
+		If 数值.Lt(MinValue) Then
+			Me.数值 = Short.MinValue
+		ElseIf Double.IsNaN(数值.RawData) Then
+			Me.数值 = 0
+		ElseIf 数值.Gt(MaxValue) Then
+			Me.数值 = Short.MaxValue
+		Else
+			Me.数值 = 数值.RawData
+		End If
 	End Sub
 	Public ReadOnly Property RawData As Object Implements INumeric.RawData
 		Get

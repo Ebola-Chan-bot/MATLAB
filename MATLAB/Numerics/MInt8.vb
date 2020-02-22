@@ -1,11 +1,20 @@
 ﻿Public Structure MInt8
 	Implements INumeric
 	Private 数值 As SByte
+	Shared ReadOnly MinValue As New MInt8(SByte.MinValue), MaxValue As New MInt8(SByte.MaxValue)
 	Sub New(数值 As SByte)
 		Me.数值 = 数值
 	End Sub
 	Sub New(数值 As INumeric)
-		Me.数值 = 数值.RawData
+		If 数值.Lt(MinValue) Then
+			Me.数值 = SByte.MinValue
+		ElseIf Double.IsNaN(数值.RawData) Then
+			Me.数值 = 0
+		ElseIf 数值.Gt(MaxValue) Then
+			Me.数值 = SByte.MaxValue
+		Else
+			Me.数值 = 数值.RawData
+		End If
 	End Sub
 	Public ReadOnly Property RawData As Object Implements INumeric.RawData
 		Get

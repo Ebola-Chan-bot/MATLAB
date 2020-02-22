@@ -110,6 +110,12 @@ Public Class Array(Of T)
 		Return 数组.本体
 	End Operator
 	''' <summary>
+	''' 将数组转换成0号元素
+	''' </summary>
+	Overloads Shared Narrowing Operator CType(数组 As Array(Of T)) As T
+		Return 数组.本体(0)
+	End Operator
+	''' <summary>
 	''' 数组数加法，每个元素加上常数得到新数组，数组元素必须实现<see cref="INumeric"/>
 	''' </summary>
 	Public Shared Operator +(A As Array(Of T), B As T) As Array(Of T)
@@ -708,6 +714,12 @@ Public Class Array(Of T)
 	End Function
 	Public Function Max(ParamArray vecdim As Byte()) As Array(Of T)
 		Return 累积降维(New Max累积器(Of T), vecdim)
+	End Function
+	Public Function Mean() As T
+		Return DirectCast(本体.AsParallel.AsUnordered.Aggregate(Function(a As INumeric, b As INumeric) a.Plus(b)), INumeric).RDivide(New MUInt32(Numel))
+	End Function
+	Public Function Mean(ParamArray vecdim As Byte()) As Array(Of T)
+		Return 累积降维(New Mean累积器(Of T), vecdim)
 	End Function
 	Public Function [Decimal]() As Array(Of MDecimal) Implements IArray.Decimal
 		If GetType(T).GetInterface("INumeric") Is Nothing Then

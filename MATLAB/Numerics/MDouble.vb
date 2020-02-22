@@ -23,6 +23,9 @@
 	End Operator
 
 	Shared Widening Operator CType(数值 As MDouble) As MDecimal
+		If 数值.数值 < Decimal.MinValue Then Return Decimal.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > Decimal.MaxValue Then Return Decimal.MaxValue
 		Return 数值.数值
 	End Operator
 
@@ -31,34 +34,58 @@
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MInt8
+		If 数值.数值 < SByte.MinValue Then Return SByte.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > SByte.MaxValue Then Return SByte.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MInt16
+		If 数值.数值 < Short.MinValue Then Return Short.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > Short.MaxValue Then Return Short.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MInt32
+		If 数值.数值 < Integer.MinValue Then Return Integer.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > Integer.MaxValue Then Return Integer.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MInt64
+		If 数值.数值 < Long.MinValue Then Return Long.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > Long.MaxValue Then Return Long.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MUInt8
+		If 数值.数值 < Byte.MinValue Then Return Byte.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > Byte.MaxValue Then Return Byte.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MUInt16
+		If 数值.数值 < UShort.MinValue Then Return UShort.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > UShort.MaxValue Then Return UShort.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MUInt32
+		If 数值.数值 < UInteger.MinValue Then Return UInteger.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > UInteger.MaxValue Then Return UInteger.MaxValue
 		Return 数值.数值
 	End Operator
 
 	Shared Narrowing Operator CType(数值 As MDouble) As MUInt64
+		If 数值.数值 < ULong.MinValue Then Return ULong.MinValue
+		If Double.IsNaN(数值.数值) Then Return 0
+		If 数值.数值 > ULong.MaxValue Then Return ULong.MaxValue
 		Return 数值.数值
 	End Operator
 
@@ -111,10 +138,14 @@
 	End Function
 
 	Public Function Min(B As INumeric) As INumeric Implements INumeric.Min
+		If Double.IsNaN(数值) Then Return B
+		If Double.IsNaN(B.RawData) Then Return Me
 		Return New MDouble(Math.Min(数值, B.RawData))
 	End Function
 
 	Public Function Max(B As INumeric) As INumeric Implements INumeric.Max
+		If Double.IsNaN(数值) Then Return B
+		If Double.IsNaN(B.RawData) Then Return Me
 		Return New MDouble(Math.Max(数值, B.RawData))
 	End Function
 

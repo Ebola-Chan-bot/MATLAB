@@ -100,51 +100,21 @@ Public Module ElMat
 		End If
 	End Sub
 	''' <summary>
-	''' 判断两个数组尺寸是否匹配，即各维长度均相等
-	''' </summary>
-	Function 匹配(Of T1, T2)(数组1 As Array(Of T1), 数组2 As Array(Of T2)) As Boolean
-		Dim a As Byte = 数组1.NDims, b As Byte = 数组2.NDims
-		If a = b Then
-			Dim d As UInteger() = 数组1.Size, e As UInteger() = 数组2.Size
-			For c As Byte = 0 To a - 1
-				If d(c) <> e(c) Then
-					Return False
-				End If
-			Next
-			Return True
-		Else
-			Return False
-		End If
-	End Function
-	''' <summary>
-	''' 先判断两个数组是否<see cref="匹配"/>，若匹配则原样返回。若不匹配，则对两个数组进行必要的扩展，使两个数组各维长度均相等，扩展采用循环填充（而非补0）。扩展操作会创建新的数组替换原来的数组。
-	''' </summary>
-	Function 适配(Of T1, T2)(ByRef 数组1 As Array(Of T1), ByRef 数组2 As Array(Of T2)) As UInteger()
-		If 匹配(数组1, 数组2) Then Return 数组1.Size.ToArray
-		Dim b As Byte = Math.Max(数组1.NDims, 数组2.NDims), c(b - 1) As UInteger, h As UInteger, i As UInteger
-		For a As Byte = 0 To b - 1
-			h = 数组1.Size(a)
-			i = 数组2.Size(a)
-			If h = i Then
-				c(a) = h
-			ElseIf h < i Then
-				c(a) = i
-			Else
-				c(a) = h
-			End If
-		Next
-		Dim d As New Array(Of T1)(c), e As New Array(Of T2)(c), f(b - 1) As UInteger, g(数组1.NDims - 1) As UInteger, j(数组2.NDims - 1) As UInteger
-		适配递归(数组1, 数组2, c, b, d, e, f, 0, g, j)
-		数组1 = d
-		数组2 = e
-		Return c
-	End Function
-	''' <summary>
 	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
 	Public Function BsxFun(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As Array(Of TIn1), B As Array(Of TIn2)) As Array(Of TOut)
-		适配(A, B)
-		Return New Array(Of TOut)(A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray, A.Size.ToArray)
+		If A.Numel = 1 Then
+			Dim c As TIn1 = A.本体(0)
+			Return New Array(Of TOut)(B.本体.Select(Function(d As TIn2) fun.Invoke(c, d)).ToArray, B.Size)
+		ElseIf B.Numel = 1 Then
+			Dim d As TIn2 = B.本体(0)
+			Return New Array(Of TOut)(A.本体.Select(Function(c As TIn1) fun.Invoke(c, d)).ToArray, A.Size)
+		Else
+			Dim c As IArray() = 适配(A, B)
+			A = c(0)
+			B = c(1)
+			Return New Array(Of TOut)(A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray, A.Size.ToArray)
+		End If
 	End Function
 	''' <summary>
 	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。

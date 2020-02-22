@@ -1,4 +1,4 @@
-﻿Friend Class Min累积器(Of T)
+﻿Public Class Min累积器(Of T)
 	Implements I累积器(Of T, T)
 	Private 最小值 As INumeric, 未积入 As Boolean = True
 

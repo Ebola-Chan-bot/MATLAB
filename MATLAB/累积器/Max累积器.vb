@@ -1,4 +1,4 @@
-﻿Friend Class Max累积器(Of T)
+﻿Public Class Max累积器(Of T)
 	Implements I累积器(Of T, T)
 	Private 最大值 As INumeric, 未积入 As Boolean = True
 
