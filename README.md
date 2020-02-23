@@ -40,7 +40,7 @@ Console.WriteLine(b)
 
 详细文档：<https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/%E6%96%87%E6%A1%A3.md>
 ## NuGet说明
-MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64 mean。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/文档.md
+MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64 mean。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/文档.md
 
 欢迎在项目URL提交Issues。
 
@@ -87,3 +87,7 @@ MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MAT
 新增函数：mean
 
 增强了INumeric数据类型转换的健壮性，当过大或过小的数转换为不足以包含它的数据类型时，数值会被截断为最接近该数值的边界值。当NaN浮点值转换为非浮点数时，将转换为0。修复了ColonExpression用于索引后本身数值发生改变的bug。
+
+### 1.2.2
+
+为了支持UWP的要求，删除了ImageSci模块，因为此模块包含商店应用不支持的API。

@@ -6,7 +6,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
@@ -15,12 +15,10 @@
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
-    <FileVersion>1.2.1.0</FileVersion>
-    <PackageReleaseNotes>1.2.1
-功能改进：Array(Of T) ColonExpression bsxfun arrayfun INumeric系列
-新增函数：mean
-增强了INumeric数据类型转换的健壮性，当过大或过小的数转换为不足以包含它的数据类型时，数值会被截断为最接近该数值的边界值。当NaN浮点值转换为非浮点数时，将转换为0。修复了ColonExpression用于索引后本身数值发生改变的bug。</PackageReleaseNotes>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
+    <FileVersion>1.2.2.0</FileVersion>
+    <PackageReleaseNotes>1.2.2
+为了支持UWP的要求，删除了ImageSci模块，因为此模块包含商店应用不支持的API。</PackageReleaseNotes>
     <UserSecretsId>c3738a53-1a50-469d-8e99-1fe3f34a8923</UserSecretsId>
   </PropertyGroup>
 
@@ -43,6 +41,10 @@
     <NoWarn>41999,42016,42020,42021,42022</NoWarn>
     <WarningsAsErrors>42017,42018,42019,42032,42036</WarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ImageSci.vb" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\图标.png">
