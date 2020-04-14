@@ -1,7 +1,7 @@
 ﻿Imports MATLAB
 Module 主模块
 	Sub Main()
-		SplitIntoCell()
+		'SplitIntoCell()
 		Console.ReadLine()
 	End Sub
 End Module
