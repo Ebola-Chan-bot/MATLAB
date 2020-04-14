@@ -91,3 +91,13 @@ MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MAT
 ### 1.2.2
 
 为了支持UWP的要求，删除了ImageSci模块，因为此模块包含商店应用不支持的API。
+
+### 2.0.0
+
+新增函数：sum atan isnan
+
+改进函数：mean min max bsxfun reshape size cat numel colon arrayfun subsasgn subsref
+
+新增高性能计算数组类：BaseArray TypedArray(Of T) BooleanArray ByteArray SingleArray
+
+新增和改进的函数都是针对新增的高性能计算数组类的，这些高性能数组类采用了许多重新设计的高性能算法，未来将会逐步取代传统数组。但在这个版本它们的功能还不完善，后续会慢慢完善。

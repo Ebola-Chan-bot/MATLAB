@@ -197,7 +197,7 @@ Public Module DataTypes
 	''' 将 X 中的值转换为单精度。
 	''' </summary>
 	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
-	<Extension> Public Function ToSingle(X As ByteArray) As SingleArray
+	<Extension> Public Function ToSingle(X As TypedArray(Of Byte)) As SingleArray
 		Return New SingleArray(X.Size.ToArray, (From a As Byte In X.本体 Select CSng(a)).ToArray)
 	End Function
 	''' <summary>
@@ -417,7 +417,7 @@ Public Module DataTypes
 	''' 将 X 中的值转换为<see cref="Byte"/>类型。
 	''' </summary>
 	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
-	Public Function ToByte(X As TypedArray(Of Single)) As ByteArray
+	<Extension> Public Function ToByte(X As TypedArray(Of Single)) As ByteArray
 		Return New ByteArray(X.Size.ToArray, (From a As Single In X.本体 Select CByte(a)).ToArray)
 	End Function
 	''' <summary>

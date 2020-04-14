@@ -21,7 +21,10 @@
 	Sub New(各维长度 As Integer())
 		Reshape(各维长度)
 	End Sub
-	Sub Reshape(ParamArray sz As Integer())
+	''' <summary>
+	''' 不同于<see cref="ElMat.Reshape(BaseArray, Integer?())"/>，这个方法不返回新数组，直接对原数组进行修改
+	''' </summary>
+	Public Sub Reshape(ParamArray sz As Integer())
 		各维长度 = 排除小尾数(1, sz)
 	End Sub
 

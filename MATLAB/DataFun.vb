@@ -106,7 +106,7 @@ Public Module DataFun
 		Return A.本体.Aggregate(Function(b As Byte, c As Byte) b + c)
 	End Function
 	''' <summary>
-	''' 查找 A 的所有元素的最小值。NaN会被忽略。
+	''' 查找 A 的所有元素的最小值。
 	''' </summary>
 	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
 	''' <returns>最小值标量</returns>
@@ -114,7 +114,7 @@ Public Module DataFun
 		Return A.本体.Min
 	End Function
 	''' <summary>
-	''' 查找 A 的所有元素的最大值。NaN会被忽略。
+	''' 查找 A 的所有元素的最大值。
 	''' </summary>
 	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
 	''' <returns>最大值标量</returns>
@@ -131,14 +131,14 @@ Public Module DataFun
 		Return New SingleArray(b.Item1, b.Item2)
 	End Function
 	''' <summary>
-	''' 计算 A 的所有元素的均值。NaN会被忽略。
+	''' 计算 A 的所有元素的均值。
 	''' </summary>
 	''' <param name="A">输入数组，指定为向量、矩阵或多维数组。</param>
 	<Extension> Public Function Mean(A As TypedArray(Of Single)) As Single
 		Return A.Sum / A.NumEl
 	End Function
 	''' <summary>
-	''' 计算 A 的所有元素的均值。NaN会被忽略。
+	''' 计算 A 的所有元素的均值。
 	''' </summary>
 	''' <param name="A">输入数组，指定为向量、矩阵或多维数组。</param>
 	<Extension> Public Function Mean(A As TypedArray(Of Byte)) As Byte

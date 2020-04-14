@@ -6,19 +6,22 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>帕菲菲</Authors>
-    <Version>1.2.2</Version>
+    <Version>2.0.0</Version>
     <PackageIcon>图标.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/Silver-Fang/MATLAB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Silver-Fang/MATLAB</RepositoryUrl>
-    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64 mean。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/文档.md
+    <Description>MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MATLAB函数：class zeros ones bsxfun reshape permute size colon plus minus cast imread rand arrayfun cat numel times rdivide eq ne gt lt max min decimal double single uint8 uint16 uint32 uint64 int8 int16 int32 int64 mean sum atan isnan。 此外将System.Array类增强为Array(Of T)，各种基本数据类型也结构化以实现统一的接口，以支持数组之间直接进行运算符操作，以及自定义类运算的数组化支持。详细文档参见项目URL：https://github.com/Silver-Fang/MATLAB/blob/master/MATLAB/文档.md
 欢迎在项目URL提交Issues。
 新版本不保证兼容旧版本，请谨慎升级。</Description>
     <PackageLicenseFile>许可.txt</PackageLicenseFile>
-    <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <FileVersion>1.2.2.0</FileVersion>
-    <PackageReleaseNotes>1.2.2
-为了支持UWP的要求，删除了ImageSci模块，因为此模块包含商店应用不支持的API。</PackageReleaseNotes>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <PackageReleaseNotes>2.0.0
+新增函数：sum atan isnan
+改进函数：mean min max bsxfun reshape size cat numel colon arrayfun subsasgn subsref
+新增高性能计算数组类：BaseArray TypedArray(Of T) BooleanArray ByteArray SingleArray
+新增和改进的函数都是针对新增的高性能计算数组类的，这些高性能数组类采用了许多重新设计的高性能算法，未来将会逐步取代传统数组。但在这个版本它们的功能还不完善，后续会慢慢完善。</PackageReleaseNotes>
     <UserSecretsId>c3738a53-1a50-469d-8e99-1fe3f34a8923</UserSecretsId>
   </PropertyGroup>
 

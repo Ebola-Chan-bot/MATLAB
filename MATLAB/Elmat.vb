@@ -121,25 +121,13 @@ Public Module ElMat
 	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
 	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Single), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As SingleArray
-		Dim c As New SingleArray(尺寸适配(A, B))
-		If c.NumEl = A.NumEl AndAlso c.NumEl = B.NumEl Then
-			c.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
-		Else
-			BsxFun递归(fun, A, B, c, c.NDims - 1, 0, 0, 0)
-		End If
-		Return c
+		Return 核心BsxFun(fun, A, B, New SingleArray(尺寸适配(A, B)))
 	End Function
 	''' <summary>
 	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
 	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Byte), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As ByteArray
-		Dim c As New ByteArray(尺寸适配(A, B))
-		If c.NumEl = A.NumEl AndAlso c.NumEl = B.NumEl Then
-			c.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
-		Else
-			BsxFun递归(fun, A, B, c, c.NDims - 1, 0, 0, 0)
-		End If
-		Return c
+		Return 核心BsxFun(fun, A, B, New ByteArray(尺寸适配(A, B)))
 	End Function
 	''' <summary>
 	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。

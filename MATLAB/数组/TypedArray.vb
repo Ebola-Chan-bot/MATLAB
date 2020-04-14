@@ -47,12 +47,17 @@
 			Next
 		End If
 	End Sub
-
+	''' <summary>
+	''' 用双层数组进行索引，第一层排列不同的维度，第二层是在该维度内要提取的切片
+	''' </summary>
 	Default WriteOnly Property SubsRA(subs As Integer()()) As TypedArray(Of T)
 		Set(value As TypedArray(Of T))
 			SubsAsgn递归(value.本体, Math.Min(NDims, subs.Length) - 1, 0, 0, subs)
 		End Set
 	End Property
+	''' <summary>
+	''' 用冒号表达式进行索引，用Nothing表示该维度下标上限
+	''' </summary>
 	Default WriteOnly Property SubsRA(subs As IntegerColon()) As TypedArray(Of T)
 		Set(value As TypedArray(Of T))
 			Dim b As Byte = Math.Min(NDims, subs.Length) - 1, c(b)() As Integer
@@ -62,6 +67,9 @@
 			SubsRA(c) = value
 		End Set
 	End Property
+	''' <summary>
+	''' 用逻辑数组进行索引，将对应位置为True的值修改为特定标量
+	''' </summary>
 	Default WriteOnly Property SubsRA(subs As TypedArray(Of Boolean)) As T
 		Set(value As T)
 			本体 = 本体.Zip(subs.本体, Function(a As T, b As Boolean) If(b, value, a)).ToArray

@@ -78,7 +78,7 @@ Public Module 通用工具
 	''' <param name="累积器">整个累积过程重复使用一个累积器</param>
 	''' <param name="维度">进行累积的维度</param>
 	''' <returns>累积结果数组，在累积维度上长度为1</returns>
-	<Extension> Friend Function 累积降维(Of TIn, TOut)(源数组 As TypedArray(Of TIn), 累积器 As I累积器(Of TIn, TOut), ParamArray 累积维度 As Byte()) As (Integer(), TOut())
+	<Extension> Function 累积降维(Of TIn, TOut)(源数组 As TypedArray(Of TIn), 累积器 As I累积器(Of TIn, TOut), ParamArray 累积维度 As Byte()) As (Integer(), TOut())
 		Dim a As Integer() = 源数组.各维长度, b As Byte = a.Length - 1, c(b) As Integer, d As SByte, g As Integer() = a.Clone
 		c(0) = 1
 		For d = 0 To b - 1
@@ -151,5 +151,13 @@ Public Module 通用工具
 			p += h
 		Next
 		Return (e, l)
+	End Function
+	Friend Function 核心BsxFun(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2), C As TypedArray(Of TOut)) As TypedArray(Of TOut)
+		If C.NumEl = A.NumEl AndAlso C.NumEl = B.NumEl Then
+			C.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
+		Else
+			BsxFun递归(fun, A, B, C, C.NDims - 1, 0, 0, 0)
+		End If
+		Return C
 	End Function
 End Module
