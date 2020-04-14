@@ -16,6 +16,15 @@
 	''' <param name="j">起点</param>
 	''' <param name="k">终点</param>
 	''' <returns>等差数列</returns>
+	Public Function Colon(j As Integer, k As Integer?) As IntegerColon
+		Return New IntegerColon(j, 1, k)
+	End Function
+	''' <summary>
+	''' 创建一个包含元素 [j,j+1,j+2,...,j+m] 的单位间距向量 x，其中 m = fix(k-j)。如果 j 和 k 都是整数，则简化为 [j,j+1,...,k]。
+	''' </summary>
+	''' <param name="j">起点</param>
+	''' <param name="k">终点</param>
+	''' <returns>等差数列</returns>
 	Public Function Colon(j As INumeric, k As INumeric) As ColonExpression
 		Return New ColonExpression(j, k)
 	End Function

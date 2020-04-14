@@ -716,10 +716,16 @@ Public Class Array(Of T)
 		Return 累积降维(New Max累积器(Of T), vecdim)
 	End Function
 	Public Function Mean() As T
-		Return DirectCast(本体.AsParallel.AsUnordered.Aggregate(Function(a As INumeric, b As INumeric) a.Plus(b)), INumeric).RDivide(New MUInt32(Numel))
+		Return DirectCast(Sum(), INumeric).RDivide(New MUInt32(Numel))
 	End Function
 	Public Function Mean(ParamArray vecdim As Byte()) As Array(Of T)
 		Return 累积降维(New Mean累积器(Of T), vecdim)
+	End Function
+	Public Function Sum() As T
+		Return 本体.AsParallel.AsUnordered.Aggregate(Function(a As INumeric, b As INumeric) a.Plus(b))
+	End Function
+	Public Function Sum(ParamArray vecdim As Byte()) As Array(Of T)
+		Return 累积降维(New Sum累积器(Of T), vecdim)
 	End Function
 	Public Function [Decimal]() As Array(Of MDecimal) Implements IArray.Decimal
 		If GetType(T).GetInterface("INumeric") Is Nothing Then

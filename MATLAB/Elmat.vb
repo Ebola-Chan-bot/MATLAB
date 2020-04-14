@@ -1,3 +1,4 @@
+Imports System.Runtime.CompilerServices
 Public Module ElMat
 	''' <summary>
 	''' 这里不创建新数组，故用底层<see cref="Array"/>
@@ -117,6 +118,30 @@ Public Module ElMat
 		End If
 	End Function
 	''' <summary>
+	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
+	''' </summary>
+	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Single), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As SingleArray
+		Dim c As New SingleArray(尺寸适配(A, B))
+		If c.NumEl = A.NumEl AndAlso c.NumEl = B.NumEl Then
+			c.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
+		Else
+			BsxFun递归(fun, A, B, c, c.NDims - 1, 0, 0, 0)
+		End If
+		Return c
+	End Function
+	''' <summary>
+	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
+	''' </summary>
+	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Byte), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As ByteArray
+		Dim c As New ByteArray(尺寸适配(A, B))
+		If c.NumEl = A.NumEl AndAlso c.NumEl = B.NumEl Then
+			c.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
+		Else
+			BsxFun递归(fun, A, B, c, c.NDims - 1, 0, 0, 0)
+		End If
+		Return c
+	End Function
+	''' <summary>
 	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。
 	''' </summary>
 	''' <typeparam name="T">元素类型</typeparam>
@@ -126,6 +151,26 @@ Public Module ElMat
 	Public Function Reshape(Of T)(A As Array(Of T), ParamArray sz As UInteger?()) As Array(Of T)
 		Reshape = A.Clone
 		Reshape.Reshape(sz)
+	End Function
+	''' <summary>
+	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。
+	''' </summary>
+	''' <param name="A">输入数组，必须具有确定的长度</param>
+	''' <param name="sz">各维长度，可以使用一个Nothing表示自动推断该维长度</param>
+	''' <returns>重构的数组</returns>
+	Public Function Reshape(A As BaseArray, ParamArray sz As Integer?()) As BaseArray
+		Reshape = A.Clone()
+		Dim f As Byte = sz.Length, b As Integer = 1, c As Integer? = Nothing, d(f - 1) As Integer
+		For e As Byte = 0 To f - 1
+			If sz(e) Is Nothing Then
+				c = e
+			Else
+				b *= sz(e)
+				d(e) = sz(e)
+			End If
+		Next
+		If c IsNot Nothing Then d(c) = Reshape.NumEl / b
+		Reshape.Reshape(d)
 	End Function
 	''' <summary>
 	''' 按照向量 dimorder 指定的顺序重新排列数组的维度。例如，<c>Permute(A, 1, 0)</c> 交换矩阵 A 的行和列维度。
@@ -156,7 +201,21 @@ Public Module ElMat
 	Public Function Size(Of T)(A As Array(Of T), [dim] As Byte) As UInteger
 		Return A.Size([dim])
 	End Function
-	<Runtime.CompilerServices.Extension> Public Function Size(A As Array) As UInteger()
+	''' <summary>
+	''' 返回维度 dim 的长度。
+	''' </summary>
+	''' <typeparam name="T">数据类型</typeparam>
+	''' <param name="A">输入数组</param>
+	''' <param name="[dim]">查询的维度</param>
+	''' <returns>数组大小</returns>
+	<Extension> Public Function Size(A As BaseArray, [dim] As Byte) As Integer
+		If [dim] < A.NDims Then
+			Return A.各维长度([dim])
+		Else
+			Return 1
+		End If
+	End Function
+	<Extension> Public Function Size(A As Array) As UInteger()
 		Dim c As Byte = A.Rank - 1, d(c) As UInteger
 		For b As Byte = 0 To c
 			d(b) = A.GetLength(b)
@@ -201,6 +260,26 @@ Public Module ElMat
 		Return g
 	End Function
 	''' <summary>
+	''' 沿维度 dim 串联 A1、A2、…、An。调用方应保证所有输入在串联维度以外的维度等长，此函数不会进行检查，也不一定会报错
+	''' </summary>
+	''' <param name="维度">沿其运算的维度</param>
+	''' <param name="A">输入列表</param>
+	''' <returns>串联的数组</returns>
+	Public Function Cat(维度 As Byte, ParamArray A As TypedArray(Of Single)()) As SingleArray
+		Dim b As (Integer(), Single()) = 核心Cat(维度, A)
+		Return New SingleArray(b.Item1, b.Item2)
+	End Function
+	''' <summary>
+	''' 沿维度 dim 串联 A1、A2、…、An。调用方应保证所有输入在串联维度以外的维度等长，此函数不会进行检查，也不一定会报错
+	''' </summary>
+	''' <param name="维度">沿其运算的维度</param>
+	''' <param name="A">输入列表</param>
+	''' <returns>串联的数组</returns>
+	Public Function Cat(维度 As Byte, ParamArray A As TypedArray(Of Byte)()) As ByteArray
+		Dim b As (Integer(), Byte()) = 核心Cat(维度, A)
+		Return New ByteArray(b.Item1, b.Item2)
+	End Function
+	''' <summary>
 	''' 返回数组 A 中的元素数目
 	''' </summary>
 	''' <typeparam name="T">数据类型</typeparam>
@@ -208,5 +287,20 @@ Public Module ElMat
 	''' <returns>元素数目</returns>
 	Public Function Numel(Of T)(A As Array(Of T)) As UInteger
 		Return A.Numel
+	End Function
+	''' <summary>
+	''' 返回数组 A 中的元素数目
+	''' </summary>
+	''' <param name="A">输入数组</param>
+	''' <returns>元素数目</returns>
+	Public Function NumEl(A As BaseArray) As Integer
+		Return A.NumEl
+	End Function
+	''' <summary>
+	''' 返回一个<see cref="BooleanArray"/>，其中的 True 对应 A 中的 NaN 元素，False 对应其他元素
+	''' </summary>
+	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	Public Function IsNan(A As TypedArray(Of Single)) As BooleanArray
+		Return New BooleanArray(A.Size.ToArray, (From b As Single In A.本体 Select Single.IsNaN(b)).ToArray)
 	End Function
 End Module

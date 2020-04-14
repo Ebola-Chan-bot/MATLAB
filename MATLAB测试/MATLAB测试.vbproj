@@ -132,7 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MATLAB\MATLAB.vbproj">
-      <Project>{4ec7f767-b34c-4e9b-b2b0-28a7273feeb8}</Project>
+      <Project>{8e92ae2b-0433-4894-ac7d-30cb0ba5abdd}</Project>
       <Name>MATLAB</Name>
     </ProjectReference>
   </ItemGroup>
