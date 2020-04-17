@@ -101,3 +101,12 @@ MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MAT
 新增高性能计算数组类：BaseArray TypedArray(Of T) BooleanArray ByteArray SingleArray
 
 新增和改进的函数都是针对新增的高性能计算数组类的，这些高性能数组类采用了许多重新设计的高性能算法，未来将会逐步取代传统数组。但在这个版本它们的功能还不完善，后续会慢慢完善。
+
+### 2.0.1
+改进函数：sum min max arrayfun bsxfun
+
+新增类：NumericArray(Of T)，该类及子类提供MathNet向量运算加速支持
+
+改进类：SingleArray, TypedArray(Of T)
+
+此版本最大的改动就是引入MathNet加速运算，仅支持NumericArray(Of T)及其子类。由于最新版MathNet不兼容UWP，这里采用的是MathNet 3.20.2，没有使用最新版。
