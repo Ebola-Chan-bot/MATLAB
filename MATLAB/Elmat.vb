@@ -1,4 +1,4 @@
-Imports System.Runtime.CompilerServices
+Imports System.Runtime.CompilerServices, MathNet.Numerics.LinearAlgebra
 Public Module ElMat
 	''' <summary>
 	''' 这里不创建新数组，故用底层<see cref="Array"/>
@@ -120,14 +120,23 @@ Public Module ElMat
 	''' <summary>
 	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
-	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Single), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As SingleArray
-		Return 核心BsxFun(fun, A, B, New SingleArray(尺寸适配(A, B)))
+	Public Function BsxFun(Of TIn1, TIn2, TOut As {Structure, IEquatable(Of TOut), IFormattable})(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As NumericArray(Of TOut)
+		Dim c As (Integer(), TOut()) = 核心BsxFun(fun, A, B)
+		Return New NumericArray(Of TOut)(c.Item1, c.Item2)
+	End Function
+	''' <summary>
+	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
+	''' </summary>
+	Public Function BsxFun(fun As Func(Of Single, Single, Single), A As NumericArray(Of Single), B As NumericArray(Of Single)) As SingleArray
+		Dim c As (Integer(), Vector(Of Single)) = 核心BsxFun(fun, A, B)
+		Return New SingleArray(c.Item1, c.Item2)
 	End Function
 	''' <summary>
 	''' 对两个数组应用按元素运算（启用隐式扩展）。不同于MATLAB，这里的隐式扩展更加健壮，采用了循环填充方式，使得允许<c>Ones(2, 2) + Ones(4, 4) = Ones(4, 4) + Ones(4, 4)</c>
 	''' </summary>
 	Public Function BsxFun(Of TIn1, TIn2)(fun As Func(Of TIn1, TIn2, Byte), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As ByteArray
-		Return 核心BsxFun(fun, A, B, New ByteArray(尺寸适配(A, B)))
+		Dim c As (Integer(), Byte()) = 核心BsxFun(fun, A, B)
+		Return New ByteArray(c.Item1, c.Item2)
 	End Function
 	''' <summary>
 	''' 将 A 重构为一个 sz1×...×szN 数组，其中 sz1,...,szN 指示每个维度的大小。可以指定 Nothing 的单个维度大小，以便自动计算维度大小，以使 B 中的元素数与 A 中的元素数相匹配。例如，如果 A 是一个 10×10 矩阵，则<c>Reshape(A, 2, 2, Nothing)</c>将 A 的 100 个元素重构为一个 2×2×25 数组。

@@ -1,4 +1,4 @@
-﻿Imports System.Runtime.CompilerServices
+﻿Imports System.Runtime.CompilerServices, MathNet.Numerics.LinearAlgebra
 Public Module 通用工具
 	''' <summary>
 	''' 返回一系列数组各维长度的最大值
@@ -13,34 +13,34 @@ Public Module 通用工具
 		Next
 		Return a
 	End Function
-	Friend Sub BsxFun递归(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2), 目标数组 As TypedArray(Of TOut), 当前维度 As Byte, A索引 As Integer, B索引 As Integer, 目标索引 As Integer)
-		Dim d As Integer = A.Size(当前维度), e As Integer = B.Size(当前维度), f As Integer = 目标数组.各维长度(当前维度)
+	Friend Sub BsxFun递归(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2), 目标数组 As IList(Of TOut), 当前维度 As Byte, A索引 As Integer, B索引 As Integer, 目标索引 As Integer, 各维长度 As Integer())
+		Dim d As Integer = A.Size(当前维度), e As Integer = B.Size(当前维度), f As Integer = 各维长度(当前维度)
 		A索引 *= d
 		B索引 *= e
 		目标索引 *= f
 		If 当前维度 > 0 Then
 			If d < f OrElse e < f Then
 				For c = 0 To f - 1
-					BsxFun递归(fun, A, B, 目标数组, 当前维度 - 1, A索引 + (c Mod d), B索引 + (c Mod e), 目标索引 + c)
+					BsxFun递归(fun, A, B, 目标数组, 当前维度 - 1, A索引 + (c Mod d), B索引 + (c Mod e), 目标索引 + c, 各维长度)
 				Next
 			Else
 				For c = 0 To f - 1
-					BsxFun递归(fun, A, B, 目标数组, 当前维度 - 1, A索引 + c, B索引 + c, 目标索引 + c)
+					BsxFun递归(fun, A, B, 目标数组, 当前维度 - 1, A索引 + c, B索引 + c, 目标索引 + c, 各维长度)
 				Next
 			End If
 		Else
 			If d < f OrElse e < f Then
 				For c = 0 To f - 1
-					目标数组.本体(目标索引 + c) = fun.Invoke(A.本体(A索引 + (c Mod d)), B.本体(B索引 + (c Mod e)))
+					目标数组(目标索引 + c) = fun.Invoke(A.本体(A索引 + (c Mod d)), B.本体(B索引 + (c Mod e)))
 				Next
 			Else
 				For c = 0 To f - 1
-					目标数组.本体(目标索引 + c) = fun.Invoke(A.本体(A索引 + c), B.本体(B索引 + c))
+					目标数组(目标索引 + c) = fun.Invoke(A.本体(A索引 + c), B.本体(B索引 + c))
 				Next
 			End If
 		End If
 	End Sub
-	Private Sub 累积递归(Of TIn, TOut)(源数组 As TIn(), 当前维度 As Byte, 累积维长 As Integer(), 当前索引 As Integer, 累积维权 As Integer(), 累积器 As I累积器(Of TIn, TOut))
+	Private Sub 累积递归(Of TIn, TOut)(源数组 As IList(Of TIn), 当前维度 As Byte, 累积维长 As Integer(), 当前索引 As Integer, 累积维权 As Integer(), 累积器 As I累积器(Of TIn, TOut))
 		Dim b As Integer = 累积维权(当前维度)
 		If 当前维度 > 0 Then
 			For a As Integer = 0 To 累积维长(当前维度) - 1
@@ -54,7 +54,7 @@ Public Module 通用工具
 			Next
 		End If
 	End Sub
-	Private Sub 拆分递归(Of TIn, TOut)(源数组 As TIn(), 目标数组 As TOut(), 当前维度 As Byte, 累积维长 As Integer(), 累积维权 As Integer(), 拆分维长 As Integer(), 源拆分维权 As Integer(), 目标拆分维权 As Integer(), 源索引 As Integer, 目标索引 As Integer, 累积器 As I累积器(Of TIn, TOut))
+	Private Sub 拆分递归(Of TIn, TOut)(源数组 As IList(Of TIn), 目标数组 As TOut(), 当前维度 As Byte, 累积维长 As Integer(), 累积维权 As Integer(), 拆分维长 As Integer(), 源拆分维权 As Integer(), 目标拆分维权 As Integer(), 源索引 As Integer, 目标索引 As Integer, 累积器 As I累积器(Of TIn, TOut))
 		Dim b As Integer = 源拆分维权(当前维度), c As Integer = 目标拆分维权(当前维度)
 		If 当前维度 > 0 Then
 			For a As Integer = 0 To 拆分维长(当前维度) - 1
@@ -133,7 +133,7 @@ Public Module 通用工具
 		For f = 维度 + 1 To d
 			j *= e(f)
 		Next
-		Dim k As Integer = g * e(维度), l(g * e(维度) * j - 1) As T, m As T(), p As Integer, q As Integer, r As Integer, h As Integer, n As Integer, o As Integer
+		Dim k As Integer = g * e(维度), l(g * e(维度) * j - 1) As T, m As IList(Of T), p As Integer, q As Integer, r As Integer, h As Integer, n As Integer, o As Integer
 		j -= 1
 		For f = 0 To c
 			m = A(f).本体
@@ -152,12 +152,26 @@ Public Module 通用工具
 		Next
 		Return (e, l)
 	End Function
-	Friend Function 核心BsxFun(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2), C As TypedArray(Of TOut)) As TypedArray(Of TOut)
-		If C.NumEl = A.NumEl AndAlso C.NumEl = B.NumEl Then
-			C.本体 = A.本体.AsParallel.AsOrdered.Zip(B.本体.AsParallel.AsOrdered, fun).ToArray
+	Friend Function 核心BsxFun(Of TIn1, TIn2, TOut)(fun As Func(Of TIn1, TIn2, TOut), A As TypedArray(Of TIn1), B As TypedArray(Of TIn2)) As (Integer(), TOut())
+		Dim c As Integer() = A.Size.ToArray
+		If c.SequenceEqual(B.Size) Then
+			Return (c, A.本体.Zip(B.本体, fun).ToArray)
 		Else
-			BsxFun递归(fun, A, B, C, C.NDims - 1, 0, 0, 0)
+			c = 尺寸适配(A, B)
+			Dim d(c.Aggregate(Function(e As Integer, f As Integer) e * f)) As TOut
+			BsxFun递归(fun, A, B, d, c.Length - 1, 0, 0, 0, c)
+			Return (c, d)
 		End If
-		Return C
+	End Function
+	Friend Function 核心BsxFun(Of T As {Structure, IEquatable(Of T), IFormattable})(fun As Func(Of T, T, T), A As NumericArray(Of T), B As NumericArray(Of T)) As (Integer(), Vector(Of T))
+		Dim c As Integer() = A.Size.ToArray
+		If c.SequenceEqual(B.Size) Then
+			Return (c, A.o本体.Map2(fun, B.o本体))
+		Else
+			c = 尺寸适配(A, B)
+			Dim d As Vector(Of T) = CreateVector.Dense(Of T)(c.Aggregate(Function(e As Integer, f As Integer) e * f))
+			BsxFun递归(fun, A, B, d, c.Length - 1, 0, 0, 0, c)
+			Return (c, d)
+		End If
 	End Function
 End Module

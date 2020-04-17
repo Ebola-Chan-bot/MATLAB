@@ -10,6 +10,6 @@
 		MyBase.New({原型.Length}, 原型)
 	End Sub
 	Public Overrides Function Clone() As BaseArray
-		Return New ByteArray(各维长度.Clone, 本体.Clone)
+		Return New ByteArray(各维长度.Clone, 本体.ToArray)
 	End Function
 End Class

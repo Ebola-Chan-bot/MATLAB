@@ -1,25 +1,23 @@
 ﻿Public MustInherit Class TypedArray(Of T)
 	Inherits BaseArray
-	Friend 本体 As T()
-	ReadOnly Property 原型 As T()
-		Get
-			Return 本体
-		End Get
-	End Property
+	Overridable ReadOnly Property 本体 As IList(Of T)
 	Sub New(各维长度 As Integer())
 		MyBase.New(各维长度)
-		ReDim 本体(各维长度.Aggregate(Function(乘积 As Integer, 乘数 As Integer) 乘积 * 乘数) - 1)
 	End Sub
-	Sub New(各维长度 As Integer(), 原型 As T())
+	Sub New(各维长度 As Integer(), 原型 As IList(Of T))
 		MyBase.New(各维长度)
 		本体 = 原型
 	End Sub
 	Public Overrides ReadOnly Property NumEl As Integer
 		Get
-			Return 本体.Length
+			If 本体 Is Nothing Then
+				Return 各维长度.Aggregate(Function(a As Integer, b As Integer) a * b)
+			Else
+				Return 本体.Count
+			End If
 		End Get
 	End Property
-	Protected Sub SubsRef递归(目标数组 As T(), 当前维度 As Byte, 源索引 As Integer, ByRef 目标索引 As Integer, 索引映射 As Integer()())
+	Private Sub SubsRef递归(目标数组 As T(), 当前维度 As Byte, 源索引 As Integer, ByRef 目标索引 As Integer, 索引映射 As Integer()())
 		Dim a As Integer() = 索引映射(当前维度)
 		源索引 *= 各维长度(当前维度)
 		If 当前维度 > 0 Then
@@ -33,6 +31,18 @@
 			Next
 		End If
 	End Sub
+	Protected Function SubsRef(subs As Integer()()) As (Integer(), T())
+		Dim b As Integer() = (From a As Integer() In subs Select a.Length).ToArray, c(b.Aggregate(Function(d As Integer, e As Integer) d * e)) As T
+		SubsRef递归(c, b.Length - 1, 0, 0, subs)
+		Return (b, c)
+	End Function
+	Protected Function SubsRef(subs As IntegerColon()) As (Integer(), T())
+		Dim b As Byte = Math.Min(NDims, subs.Length) - 1, c(b)() As Integer
+		For a As Byte = 0 To b
+			c(a) = subs(a).ToIndex(各维长度(a) - 1)
+		Next
+		Return SubsRef(c)
+	End Function
 	Private Sub SubsAsgn递归(源数组 As T(), 当前维度 As Byte, ByRef 源索引 As Integer, 目标索引 As Integer, 索引映射 As Integer()())
 		Dim a As Integer() = 索引映射(当前维度)
 		目标索引 *= 各维长度(当前维度)
@@ -72,7 +82,10 @@
 	''' </summary>
 	Default WriteOnly Property SubsRA(subs As TypedArray(Of Boolean)) As T
 		Set(value As T)
-			本体 = 本体.Zip(subs.本体, Function(a As T, b As Boolean) If(b, value, a)).ToArray
+			Dim b As IList(Of Boolean) = subs.本体
+			For a As Integer = 0 To NumEl - 1
+				If b(a) Then 本体(a) = value
+			Next
 		End Set
 	End Property
 End Class

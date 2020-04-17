@@ -95,6 +95,17 @@ Public Module DataTypes
 		Return New SingleArray(A.Size.ToArray, (From b As T In A.本体 Select func.Invoke(b)).ToArray)
 	End Function
 	''' <summary>
+	''' 将函数 func 应用于 A 的元素，一次一个元素。然后 ArrayFun 将 func 的输出串联成输出数组 B，因此，对于 A 的第 i 个元素来说，B(i) = func(A(i))。输入参数 func 是一个函数的函数句柄，此函数接受一个输入参数并返回一个标量。func 的输出可以是任何数据类型，只要该类型的对象可以串联即可。数组 A 和 B 必须具有相同的大小。<br/>
+	''' 您不能指定 arrayfun 计算 B 的各元素的顺序，也不能指望它们按任何特定的顺序完成计算。<br/>
+	''' 当参与一系列运算的数组只有一个，其它均为标量时，使用<see cref="ArrayFun(Of T)(Func(Of T, Single), TypedArray(Of T))"/>通常可以有效提高性能。
+	''' </summary>
+	''' <param name="func">要对输入数组的元素应用的函数，指定为函数句柄。</param>
+	''' <param name="A">输入数组。</param>
+	''' <returns>输出数组</returns>
+	Public Function ArrayFun(Of T As {Structure, IEquatable(Of T), IFormattable})(func As Func(Of T, Single), A As NumericArray(Of T)) As SingleArray
+		Return New SingleArray(A.Size.ToArray, A.o本体.Map(func))
+	End Function
+	''' <summary>
 	''' 将 X 中的值转换为十进位。
 	''' </summary>
 	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
@@ -199,6 +210,13 @@ Public Module DataTypes
 	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
 	<Extension> Public Function ToSingle(X As TypedArray(Of Byte)) As SingleArray
 		Return New SingleArray(X.Size.ToArray, (From a As Byte In X.本体 Select CSng(a)).ToArray)
+	End Function
+	''' <summary>
+	''' 将 X 中的值转换为单精度。
+	''' </summary>
+	''' <param name="X">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	<Extension> Public Function ToSingle(X As NumericArray(Of Byte)) As SingleArray
+		Return New SingleArray(X.Size.ToArray, X.o本体.Map(Function(a As Byte) CSng(a)))
 	End Function
 	''' <summary>
 	''' 将 X 中的值转换为单精度。

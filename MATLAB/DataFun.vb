@@ -102,6 +102,13 @@ Public Module DataFun
 	''' 计算 A 的所有元素的总和
 	''' </summary>
 	''' <param name="A">输入数组，指定为向量、矩阵或多维数组。</param>
+	<Extension> Public Function Sum(Of T As {Structure, IEquatable(Of T), IFormattable})(A As NumericArray(Of T)) As T
+		Return A.o本体.Sum()
+	End Function
+	''' <summary>
+	''' 计算 A 的所有元素的总和
+	''' </summary>
+	''' <param name="A">输入数组，指定为向量、矩阵或多维数组。</param>
 	<Extension> Public Function Sum(A As TypedArray(Of Byte)) As Byte
 		Return A.本体.Aggregate(Function(b As Byte, c As Byte) b + c)
 	End Function
@@ -114,12 +121,28 @@ Public Module DataFun
 		Return A.本体.Min
 	End Function
 	''' <summary>
+	''' 查找 A 的所有元素的最小值。
+	''' </summary>
+	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	''' <returns>最小值标量</returns>
+	<Extension> Public Function Min(Of T As {Structure, IEquatable(Of T), IFormattable})(A As NumericArray(Of T)) As T
+		Return A.o本体.Minimum
+	End Function
+	''' <summary>
 	''' 查找 A 的所有元素的最大值。
 	''' </summary>
 	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
 	''' <returns>最大值标量</returns>
 	<Extension> Public Function Max(Of T)(A As TypedArray(Of T)) As T
 		Return A.本体.Max()
+	End Function
+	''' <summary>
+	''' 查找 A 的所有元素的最大值。
+	''' </summary>
+	''' <param name="A">输入数组，指定为标量、向量、矩阵或多维数组。</param>
+	''' <returns>最大值标量</returns>
+	<Extension> Public Function Max(Of T As {Structure, IEquatable(Of T), IFormattable})(A As NumericArray(Of T)) As T
+		Return A.o本体.Maximum
 	End Function
 	''' <summary>
 	''' 计算向量 vecdim 所指定的维度上的均值。例如，如果 A 是矩阵，则<c>Mean(A, 0, 1)</c>是 A 中所有元素的均值，因为矩阵的每个元素都包含在由维度 0 和 1 定义的数组切片中。NaN会被忽略。

@@ -10,7 +10,6 @@
 	End Function
 	Friend 各维长度 As Integer()
 	MustOverride ReadOnly Property NumEl As Integer
-
 	Public ReadOnly Property NDims As Byte
 		Get
 			Return 各维长度.Length
