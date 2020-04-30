@@ -110,3 +110,7 @@ MATLAB一些数组操作的.Net实现，详见项目URL。 目前已实现的MAT
 改进类：SingleArray, TypedArray(Of T)
 
 此版本最大的改动就是引入MathNet加速运算，仅支持NumericArray(Of T)及其子类。由于最新版MathNet不兼容UWP，这里采用的是MathNet 3.20.2，没有使用最新版。
+
+### 2.0.2
+
+修复ByteArray仅指定各维长度时生成的数组无效的问题
